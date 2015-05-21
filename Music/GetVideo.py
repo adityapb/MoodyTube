@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from YoutTubeId import YouTube
+from YouTubeId import YouTube
 import urllib
 import json
 
