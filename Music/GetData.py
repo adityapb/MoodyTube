@@ -16,4 +16,5 @@ def GetData(YOUTUBE_API_KEY):
 
 f = open('id.txt', 'r')
 api_key = f.read()
+f.close()
 GetData(api_key)
