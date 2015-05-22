@@ -8,8 +8,9 @@ def GetData(YOUTUBE_API_KEY):
 					'angry' : 'calm'}
 	data = {}
 	for mood in mood_music:
-		x = Music(YOUTUBE_API_KEY, mood)
+		x = Music(YOUTUBE_API_KEY, mood_music[mood])
 		data[mood] = x.GetVideoURL()
+	data[''] = ''
 	with open(str(os.getcwd()) + '/data.db', 'w') as f:
 		pickle.dump(data, f)
 	return

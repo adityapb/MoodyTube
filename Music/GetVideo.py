@@ -24,7 +24,9 @@ class Music:
 		BASE_URL = "https://www.youtube.com/watch?v="
 		tracks = self.GetTracks()
 		y = YouTube(self.YOUTUBE_API_KEY)
-		urls = []
+		urls = {}
 		for track in tracks:
-			urls.append(BASE_URL + y.GetID(track))
+			ID = y.GetID(track)
+			if ID != -1:
+				urls[track] = (BASE_URL + y.GetID(track))
 		return urls
