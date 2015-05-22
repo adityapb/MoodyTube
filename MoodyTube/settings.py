@@ -49,7 +49,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 TEMPLATE_DIRS = (
-    '/Users/aditya/Desktop/MoodyTube/Templates',
+    str(os.getcwd()) + '/Templates',
 )
 
 ROOT_URLCONF = 'MoodyTube.urls'
