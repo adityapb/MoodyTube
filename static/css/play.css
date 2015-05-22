@@ -1,0 +1,17 @@
+h3
+{
+	text-align: center;
+}
+
+.playlist
+{
+	text-align: center;
+	border: solid turquoise;
+	border-width: 5px;
+	padding: 30px;
+}
+
+a 
+{
+	color: black;
+}

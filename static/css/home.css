@@ -1,0 +1,39 @@
+h1
+{
+	background-color: turquoise;
+	font-size: 40px;
+	display: block;
+	text-align: center;
+	color: white;
+	font-family: verdana;
+	padding: 10px;
+}
+
+label
+{
+	font-size: 20px;
+}
+
+input[type="text"]
+{
+	margin: 0 auto;
+	width:30%;
+	border: 1px solid black;
+	font-family: sans-serif;
+	font-size: 18px;
+	padding: 5px;
+	appearance: none;
+	box-shadow: none;
+	border-radius: none;
+}
+
+input[type="submit"]
+{
+	padding: 20px;
+	font-size: 30px;
+}
+
+form
+{
+	text-align: center;
+}
