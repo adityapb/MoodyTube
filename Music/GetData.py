@@ -15,7 +15,8 @@ def GetData(YOUTUBE_API_KEY):
 		pickle.dump(data, f)
 	return
 
-f = open('id.txt', 'r')
-api_key = f.read()
-f.close()
-GetData(api_key)
+if __name__ == '__main__':
+	f = open('id.txt', 'r')
+	api_key = f.read()
+	f.close()
+	GetData(api_key)
