@@ -2,18 +2,23 @@
 <html>
 	<head>
 		{% if not query %}<title>MoodyTube</title>
-		{% else %}<title>Playlist</title>{% endif %}
+		<link rel="stylesheet" href="/static/css/home.css">
+		{% else %}<title>Playlist</title>
+		<link rel="stylesheet" href="/static/css/home.css">
+		<link rel="stylesheet" href="/static/css/play.css">{% endif %}
 	</head>
 	<body>
+		<h1>MoodyTube</h1>
 		<form action = "." method = "get">
 			<label for="q">Enter your mood:</label>
 			<input type="text" name="q" value="{{ query|escape }}" >
 			<input type="submit" value="Play">
 		</form>
 		{% if query %}
+		<h3>Playlist:</h3>
 		<div class="playlist">
 			{% for name, link in playlist.items %}
-				<a href = {{link}}>{{name}}</a><br>
+				<a href = {{link}}>{{name}}</a><br><br>
 			{% endfor %}
 		</div>
 		{% endif %}
