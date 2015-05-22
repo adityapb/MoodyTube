@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		{% if not query %}<title>MoodyTube</title>
+		{% else %}<title>Playlist</title>{% endif %}
+	</head>
+	<body>
+		<form action = "." method = "get">
+			<label for="q">Enter your mood:</label>
+			<input type="text" name="q" value="{{ query|escape }}" >
+			<input type="submit" value="Play">
+		</form>
+		{% if query %}
+		<div class="playlist">
+			{% for name, link in playlist.items %}
+				<a href = {{link}}>{{name}}</a><br>
+			{% endfor %}
+		</div>
+		{% endif %}
+	</body>
+</html>
