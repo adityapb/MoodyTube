@@ -38,6 +38,25 @@ class Image:
 			print "Saved {0} image".format(i)
 			cv2.imwrite(str(i) + '.bmp' , image)
 		return
+		
+	def cornerDetect(self, img, x, y, w, h):
+		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+		gray = np.float32(gray)
+		dst = cv2.cornerHarris(gray,2,3,0.04)
+		#result is dilated for marking the corners, not important
+		dst = cv2.dilate(dst,None)
+		# Threshold for an optimal value, it may vary depending on the image.
+		#if j,i lies in y:y+h , x:x+w; use those coordinates
+		count = 0.
+		for i in [x:x+w]:
+			for j in [y:y+h]:
+				if dst[i][j] > 0.5*dst.max():
+					X += i
+					Y += j
+					count += 1
+		return [X/count , Y/count]
+		
+	
 
 	def alignImg(self, *args):
 		'''Align eyes and mouth in all images'''
@@ -46,6 +65,7 @@ class Image:
 	def average(self, *args):
 		'''Find average of all images in args'''
 		pass
+		
 
 			
 if __name__ == '__main__':
