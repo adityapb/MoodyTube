@@ -39,6 +39,14 @@ class Image:
 			cv2.imwrite(str(i) + '.bmp' , image)
 		return
 
+	def alignImg(self, *args):
+		'''Align eyes and mouth in all images'''
+		pass
+
+	def average(self, *args):
+		'''Find average of all images in args'''
+		pass
+
 			
 if __name__ == '__main__':
 	img = Image(str(os.getcwd()) + '/haarcascades/haarcascade_frontalface_alt.xml')
