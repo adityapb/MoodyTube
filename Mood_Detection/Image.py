@@ -6,6 +6,7 @@ import cv2
 import glob
 import os
 import sys
+import numpy as np
 
 class Image:
 	
@@ -13,10 +14,12 @@ class Image:
 		self.CASCADE_PATH = cascade
 		#self.IMG_PATH = img
 		
-	def cropImg(self, *args):
+	def identify(self, *args):
+		'''For simplicity args has filenames'''
 		Cascade = cv2.CascadeClassifier(self.CASCADE_PATH)
 		#os.chdir(self.IMG_PATH)
 		crop_img = []
+		parameters = {}
 		for filename in args:
 			image = cv2.imread(str(filename))
 			gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -29,7 +32,14 @@ class Image:
 			)
 			print "Found {0} objects!".format(len(objects))
 			for (x, y, w, h) in objects:
-				crop_img.append(image[y:y+h , x:x+w])
+				parameters[filename] = (x, y, w, h)
+		return parameters
+		
+	def cropImg(self, *args):
+		'''args has filenames'''
+		crop_img = []
+		for filename, (x, y, w, h) in self.identify(*args).items:
+			crop_img.append(cv2.imread(str(filename))
 		return crop_img
 			
 	def saveImg(self, PATH, *args):
@@ -57,6 +67,12 @@ class Image:
 		return [X/count , Y/count]
 		
 	
+	def rotateImage(self, image, angle):
+  		image_center = tuple(np.array(image.shape)/2)
+  		rot_mat = cv2.getRotationMatrix2D(image_center,angle,1.0)
+  		result = cv2.warpAffine(image, rot_mat, image.shape,flags=cv2.INTER_LINEAR)
+  		return result
+	
 
 	def alignImg(self, *args):
 		'''Align eyes and mouth in all images'''
@@ -69,11 +85,15 @@ class Image:
 
 			
 if __name__ == '__main__':
-	img = Image(str(os.getcwd()) + '/haarcascades/haarcascade_frontalface_alt.xml')
-	BASE_IMG_PATH = str(sys.argv[1])
-	images = []
-	for filename in glob.glob(BASE_IMG_PATH + '/*.bmp'):
-		images.append(filename)
-	cropped = img.cropImg(*images)
-	img.saveImg(str(os.getcwd()) + '/cropped', *cropped)
+	if 'crop' in sys.argv:
+		img = Image(str(os.getcwd()) + '/haarcascades/haarcascade_frontalface_alt.xml')
+		BASE_IMG_PATH = str(sys.argv[2])
+		images = []
+		for filename in glob.glob(BASE_IMG_PATH + '/*.bmp'):
+			images.append(filename)
+		cropped = img.cropImg(*images)
+		img.saveImg(str(os.getcwd()) + '/cropped', *cropped)
+	
+	if 'rotate' in sys.argv:
+		
 	
