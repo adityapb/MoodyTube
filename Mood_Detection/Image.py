@@ -61,7 +61,7 @@ class Image:
 		# Threshold for an optimal value, it may vary depending on the image.
 		#if j,i lies in y:y+h , x:x+w; use those coordinates
 		corners= []
-		for (x, y, w, h) in identify(img):
+		for (x, y, w, h) in self.identify(img):
 			count = 0.
 			for i in range(x,x+w):
 				for j in range(y,y+h):
@@ -85,10 +85,10 @@ class Image:
 		'''args has images'''
 		aligned = []
 		for image in args:
-			corners = cornerDetect(image)
+			corners = self.cornerDetect(image)
 			tangent = (corners[0][1] - corners[1][1])/(corners[0][0] - corners[1][0])
 			angle = math.degrees(math.atan(tangent))
-			aligned.append(rotateImage(image, angle))
+			aligned.append(self.rotateImage(image, angle))
 		return aligned
 				
 	
