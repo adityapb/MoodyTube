@@ -1,5 +1,13 @@
-*.txt
+#Python compiled files
 *~
 *.pyc
-*.sqlite3
+
+#Tests
 test.py
+
+#Training set
+*.bmp
+
+#others
+*.txt
+*.sqlite3
