@@ -43,6 +43,7 @@ class Image:
 		return crop_img
 			
 	def saveImg(self, PATH, *args):
+		'''Here args are images and not filenames'''
 		os.chdir(PATH)
 		for i, image in enumerate(args):
 			print "Saved {0} image".format(i)
@@ -73,9 +74,14 @@ class Image:
   		result = cv2.warpAffine(image, rot_mat, image.shape,flags=cv2.INTER_LINEAR)
   		return result
 	
-
+	
+	def alignEyes(self, *args):
+		pass
+	
 	def alignImg(self, *args):
-		'''Align eyes and mouth in all images'''
+		'''Align eyes and mouth in all images
+		First rotate the images to align the eyes
+		Then change (x,y,w,h) to align all the eyes in the dataset to a fixed point'''
 		pass
 
 	def average(self, *args):
@@ -94,6 +100,6 @@ if __name__ == '__main__':
 		cropped = img.cropImg(*images)
 		img.saveImg(str(os.getcwd()) + '/cropped', *cropped)
 	
-	if 'rotate' in sys.argv:
+	if 'align' in sys.argv:
 		
 	

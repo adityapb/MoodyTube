@@ -1,6 +1,7 @@
 from GetVideo import Music
 import cPickle as pickle
 import os
+import sys
 
 def GetData(YOUTUBE_API_KEY):
 	mood_music = {'sad' : 'motivational',
@@ -16,7 +17,4 @@ def GetData(YOUTUBE_API_KEY):
 	return
 
 if __name__ == '__main__':
-	f = open('id.txt', 'r')
-	api_key = f.read()
-	f.close()
-	GetData(api_key)
+	GetData(str(sys.argv[1]))
