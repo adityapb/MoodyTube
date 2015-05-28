@@ -7,6 +7,7 @@ import glob
 import os
 import sys
 import numpy as np
+import math
 
 class Image:
 	
@@ -82,7 +83,14 @@ class Image:
 	
 	def alignEyes(self, *args):
 		'''args has images'''
-		
+		aligned = []
+		for image in args:
+			corners = cornerDetect(image)
+			tangent = (corners[0][1] - corners[1][1])/(corners[0][0] - corners[1][0])
+			angle = math.degrees(math.atan(tangent))
+			aligned.append(rotateImage(image, angle))
+		return aligned
+				
 	
 	def alignImg(self, *args):
 		'''Align eyes and mouth in all images
@@ -108,7 +116,7 @@ if __name__ == '__main__':
 		
 	if 'rotate' in sys.argv:
 		x = Image()
-		img = x.rotateImage(cv2.imread(str(os.getcwd()) + '/male/EMBmale20happy.bmp'), 90)
+		img = x.rotateImage(cv2.imread(str(os.getcwd()) + '/male/EMBmale20happy.bmp'), 20)
 		cv2.imshow('rotated', img)
 		cv2.waitKey(0)
 	
