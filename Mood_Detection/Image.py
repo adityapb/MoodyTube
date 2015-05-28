@@ -62,8 +62,8 @@ class Image:
 		corners= []
 		for (x, y, w, h) in identify(img):
 			count = 0.
-			for i in [x:x+w]:
-				for j in [y:y+h]:
+			for i in range(x,x+w):
+				for j in range(y,y+h):
 					if dst[i][j] > 0.5*dst.max():
 						X += i
 						Y += j
@@ -74,8 +74,9 @@ class Image:
 	
 	def rotateImage(self, image, angle):
   		image_center = tuple(np.array(image.shape)/2)
-  		rot_mat = cv2.getRotationMatrix2D(image_center,angle,1.0)
-  		result = cv2.warpAffine(image, rot_mat, image.shape,flags=cv2.INTER_LINEAR)
+  		rot_mat = cv2.getRotationMatrix2D((image_center[0], image_center[1]),angle,1.0)
+  		result = cv2.warpAffine(image, rot_mat, (image.shape[0], image.shape[1]),flags=cv2.INTER_LINEAR)
+  		cv2.resize(result, tuple(reversed(image.shape[:2])))
   		return result
 	
 	
@@ -104,7 +105,13 @@ if __name__ == '__main__':
 			images.append(cv2.imread(filename))
 		cropped = img.cropImg(*images)
 		img.saveImg(str(os.getcwd()) + '/cropped', *cropped)
+		
+	if 'rotate' in sys.argv:
+		x = Image()
+		img = x.rotateImage(cv2.imread(str(os.getcwd()) + '/male/EMBmale20happy.bmp'), 90)
+		cv2.imshow('rotated', img)
+		cv2.waitKey(0)
 	
 	if 'align' in sys.argv:
-		
+		pass
 	
