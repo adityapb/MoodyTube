@@ -8,6 +8,10 @@ test.py
 #Training set
 *.bmp
 
+#haarcascades
+*.xml
+
 #others
 *.txt
 *.sqlite3
+eye.py

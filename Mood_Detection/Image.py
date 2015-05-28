@@ -15,13 +15,13 @@ class Image:
 		self.CASCADE_PATH = cascade
 		#self.IMG_PATH = img
 		
-	def identify(self, *args):
+	def identify(self, **kwargs):
 		'''args has images'''
 		Cascade = cv2.CascadeClassifier(self.CASCADE_PATH)
 		#os.chdir(self.IMG_PATH)
 		crop_img = []
 		parameters = {}
-		for image in args:
+		for filename, image in kwargs.iteritems():
 			#image = cv2.imread(str(filename))
 			gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 			objects = Cascade.detectMultiScale(
@@ -33,15 +33,15 @@ class Image:
 			)
 			print "Found {0} objects!".format(len(objects))
 			for (x, y, w, h) in objects:
-				if image not in parameters: parameters[image] = [(x, y, w, h)]
-				else: parameters[image].append((x, y, w, h))
+				if filename not in parameters: parameters[filename] = [(x, y, w, h)]
+				else: parameters[filename].append((x, y, w, h))
 		return parameters
 		
-	def cropImg(self, *args):
+	def cropImg(self, **kwargs):
 		'''args has images'''
 		crop_img = []
-		for image, (x, y, w, h) in self.identify(*args).items:
-			crop_img.append(image[y:y+h , x:x+w])
+		for filename, (x, y, w, h) in self.identify(**kwargs).iteritems():
+			crop_img.append(kwargs[filename][y:y+h , x:x+w])
 		return crop_img
 			
 	def saveImg(self, PATH, *args):
@@ -52,7 +52,8 @@ class Image:
 		return
 		
 	def cornerDetect(self, img):
-		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+		'''img is a dictionary with filename as key and image as value'''
+		for key in img:	gray = cv2.cvtColor(img[key],cv2.COLOR_BGR2GRAY)
 		gray = np.float32(gray)
 		dst = cv2.cornerHarris(gray,2,3,0.04)
 		#(x, y, w, h) = identify(img)
@@ -61,15 +62,16 @@ class Image:
 		# Threshold for an optimal value, it may vary depending on the image.
 		#if j,i lies in y:y+h , x:x+w; use those coordinates
 		corners= []
-		for (x, y, w, h) in self.identify(img):
-			count = 0.
-			for i in range(x,x+w):
-				for j in range(y,y+h):
-					if dst[i][j] > 0.5*dst.max():
-						X += i
-						Y += j
-						count += 1
-			corners.append([X/count , Y/count])
+		for key in img:
+			for filename, (x, y, w, h) in self.identify(**img).iteritems():
+				count = 0.
+				for i in range(x,x+w):
+					for j in range(y,y+h):
+						if dst[i][j] > 0.5*dst.max():
+							X += i
+							Y += j
+							count += 1
+				corners.append([X/count , Y/count])
 		return corners
 		
 	
@@ -77,21 +79,23 @@ class Image:
   		image_center = tuple(np.array(image.shape)/2)
   		rot_mat = cv2.getRotationMatrix2D((image_center[0], image_center[1]),angle,1.0)
   		result = cv2.warpAffine(image, rot_mat, (image.shape[0], image.shape[1]),flags=cv2.INTER_LINEAR)
-  		cv2.resize(result, tuple(reversed(image.shape[:2])))
+  		#result = cv2.resize(result, tuple(reversed(image.shape[:2])))
   		return result
 	
 	
-	def alignEyes(self, *args):
+	def alignEyes(self, **kwargs):
 		'''args has images'''
-		aligned = []
-		for image in args:
-			corners = self.cornerDetect(image)
-			tangent = (corners[0][1] - corners[1][1])/(corners[0][0] - corners[1][0])
-			angle = math.degrees(math.atan(tangent))
-			aligned.append(self.rotateImage(image, angle))
+		aligned = {}
+		for filename, image in kwargs.iteritems():
+			corners = self.cornerDetect({filename:image})
+			if len(corners) == 2:
+				tangent = (corners[0][1] - corners[1][1])/(corners[0][0] - corners[1][0])
+				angle = math.degrees(math.atan(tangent))
+				aligned[filename] = self.rotateImage(image, angle)
+			else: aligned[filename] = image
 		return aligned
 				
-	
+				
 	def alignImg(self, *args):
 		'''Align eyes and mouth in all images
 		First rotate the images to align the eyes
@@ -108,18 +112,25 @@ if __name__ == '__main__':
 	if 'crop' in sys.argv:
 		img = Image(str(os.getcwd()) + '/haarcascades/haarcascade_frontalface_alt.xml')
 		BASE_IMG_PATH = str(sys.argv[2])
-		images = []
+		images = {}
 		for filename in glob.glob(BASE_IMG_PATH + '/*.bmp'):
-			images.append(cv2.imread(filename))
-		cropped = img.cropImg(*images)
+			images[filename] = cv2.imread(filename)
+		cropped = img.cropImg(**images)
 		img.saveImg(str(os.getcwd()) + '/cropped', *cropped)
 		
 	if 'rotate' in sys.argv:
 		x = Image()
-		img = x.rotateImage(cv2.imread(str(os.getcwd()) + '/male/EMBmale20happy.bmp'), 20)
+		img = x.rotateImage(cv2.imread(str(os.getcwd()) + '/male/EMBmale20happy.bmp'), 45)
 		cv2.imshow('rotated', img)
 		cv2.waitKey(0)
 	
 	if 'align' in sys.argv:
-		pass
+		eye = Image(str(os.getcwd()) + '/haarcascades/haarcascade_eyes.xml')
+		face = Image(str(os.getcwd()) + '/haarcascades/haarcascade_frontalface_alt.xml')
+		images = {}
+		for filename in glob.glob(str(os.getcwd()) + '/male/*.bmp'):
+			images[filename] = cv2.imread(filename)
+		aligned = eye.alignEyes(**images)
+		cropped = face.cropImg(**aligned)
+		face.saveImg(str(os.getcwd()) + '/cropped', *cropped)
 	
