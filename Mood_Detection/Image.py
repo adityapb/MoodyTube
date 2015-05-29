@@ -16,10 +16,8 @@ class Image:
 		#self.IMG_PATH = img
 		
 	def identify(self, **kwargs):
-		'''args has images'''
 		Cascade = cv2.CascadeClassifier(self.CASCADE_PATH)
 		#os.chdir(self.IMG_PATH)
-		crop_img = []
 		parameters = {}
 		for filename, image in kwargs.iteritems():
 			#image = cv2.imread(str(filename))
@@ -35,13 +33,14 @@ class Image:
 			for (x, y, w, h) in objects:
 				if filename not in parameters: parameters[filename] = [(x, y, w, h)]
 				else: parameters[filename].append((x, y, w, h))
+		#print len(parameters)
 		return parameters
 		
 	def cropImg(self, **kwargs):
-		'''args has images'''
 		crop_img = []
-		for filename, (x, y, w, h) in self.identify(**kwargs).iteritems():
-			crop_img.append(kwargs[filename][y:y+h , x:x+w])
+		for filename, list_of_parameters in self.identify(**kwargs).iteritems():
+			for (x, y, w, h) in list_of_parameters:
+				crop_img.append(kwargs[filename][y:y+h , x:x+w])
 		return crop_img
 			
 	def saveImg(self, PATH, *args):
@@ -62,9 +61,11 @@ class Image:
 		# Threshold for an optimal value, it may vary depending on the image.
 		#if j,i lies in y:y+h , x:x+w; use those coordinates
 		corners= []
-		for key in img:
-			for filename, (x, y, w, h) in self.identify(**img).iteritems():
+		for filename, list_of_parameters in self.identify(**img).iteritems():
+			for (x, y, w, h) in list_of_parameters:
 				count = 0.
+				X = 0
+				Y = 0
 				for i in range(x,x+w):
 					for j in range(y,y+h):
 						if dst[i][j] > 0.5*dst.max():
@@ -125,7 +126,7 @@ if __name__ == '__main__':
 		cv2.waitKey(0)
 	
 	if 'align' in sys.argv:
-		eye = Image(str(os.getcwd()) + '/haarcascades/haarcascade_eyes.xml')
+		eye = Image(str(os.getcwd()) + '/haarcascades/haarcascade_eye.xml')
 		face = Image(str(os.getcwd()) + '/haarcascades/haarcascade_frontalface_alt.xml')
 		images = {}
 		for filename in glob.glob(str(os.getcwd()) + '/male/*.bmp'):
