@@ -2,6 +2,9 @@
 *~
 *.pyc
 
+#Reference books
+*.pdf
+
 #Tests
 test.py
 
