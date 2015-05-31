@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 '''Faces will be detected such that the centre of the nose is at the centre of the face
 WITHOUT ALIGNING IMAGES by eye detection'''
 
