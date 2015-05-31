@@ -11,7 +11,7 @@ import math
 
 class Image:
 	
-	def __init__(self, cascade = ''):
+	def __init__(self, cascade = None):
 		self.CASCADE_PATH = cascade
 		#self.IMG_PATH = img
 		
