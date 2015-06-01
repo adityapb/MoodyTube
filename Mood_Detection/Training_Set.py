@@ -21,12 +21,16 @@ class Training:
 		self.face = Image(face_cascade)
 		
 	def IdError(self, image):
-		pass
+		'''Use primitive way of saving the image'''
+		for filename, list_of_parameters in self.face.identify(image).iteritems():
+			if len(list_of_parameters) != 1: raise Exception('Identification error for face')
+			for (x, y, w, h) in list_of_parameters:
+				return cv2.imread(image)[y:y+h , x:x+w]
 		
 	def nose_center(self, image):
 		for filename, list_of_parameters in self.nose.identify(image).iteritems():
 			if len(list_of_parameters) != 1:
-				self.IdError(image)
+				#self.IdError(image)
 				return None
 			for (x, y, w, h) in list_of_parameters:
 				return (x + (w/2.) , y + (h/2.))
@@ -34,7 +38,7 @@ class Training:
 	def faceIdentify(self, image):
 		for filename, list_of_parameters in self.face.identify(image).iteritems():
 			if len(list_of_parameters) != 1:
-				self.IdError(image)
+				#self.IdError(image)
 				return None
 			for (x, y, w, h) in list_of_parameters:
 				return (w, h)
@@ -57,15 +61,15 @@ class Training:
 		try:
 			return self.face.getImg(image)[x[1]:x[1]+x[3] , x[0]:x[0]+x[2]]
 		except:
-			return None
+			return self.IdError(image)
 		
 	def save(self, PATH, *args):
 		os.chdir(PATH)
 		for i, image in enumerate(args):
-			try:
+			if image is not None:
 				print "Saved {0} image".format(i)
 				cv2.imwrite(str(i) + '.bmp' , image)
-			except:
+			else:
 				print "Not saved {0}".format(i)
 		return
 			
