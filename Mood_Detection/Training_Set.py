@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
 '''Faces will be detected such that the centre of the nose is at the centre of the face
-WITHOUT ALIGNING IMAGES by eye detection'''
+Consider image alignment by eye detection using Shi-Tomasi corner detection algorithm'''
+
 
 from Image import Image
 import cv2
@@ -15,13 +16,19 @@ import numpy as np
 
 class Training:
 	
-	def __init__(self, nose_cascade = None, face_cascade = None):
-		#if nose_cascade or face_cascade is None: warnings.warn('One of the cascades is still None')
+	def __init__(self, nose_cascade = None, face_cascade = None, eye_cascade = None):
+		#if nose_cascade or face_cascade is None: warnings.warn('Some of the cascades are still None')
 		self.nose = Image(nose_cascade)
 		self.face = Image(face_cascade)
+		self.eye = Image(eye_cascade)
+		
+	def alignedImage(self, image):
+		for filename, image in self.eye.alignEyes(image).iteritems():
+			return image
 		
 	def IdError(self, image):
 		'''Use primitive way of saving the image'''
+		image = self.alignedImage(image)
 		for filename, list_of_parameters in self.face.identify(image).iteritems():
 			if len(list_of_parameters) is not 1: raise Exception('Identification error for face')
 			for (x, y, w, h) in list_of_parameters:
@@ -46,6 +53,7 @@ class Training:
 	def alignFace(self, image):
 		'''(nose_x, nose_y) = self.nose_center(image)
 		(height, length) = self.faceIdentify(image)'''
+		image = self.alignedImage(image)
 		center = self.nose_center(image)
 		dimensions = self.faceIdentify(image)
 		try:

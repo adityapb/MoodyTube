@@ -84,14 +84,14 @@ class Image:
 		img = self.getImg(filename)
 		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 		result = []
-		for filename, list_of_parameters in self.identify(filename):
+		for filename, list_of_parameters in self.identify(filename).iteritems():
 			for (x, y, w, h) in list_of_parameters:
 				corners = cv2.goodFeaturesToTrack(gray[y:y+h , x:x+w],1,0.01,10)
-				total_corners.append(np.int0(corners))
+				corners = np.int0(corners)
 				for i in corners:
 					u,v = i.ravel()
 					result.append((u+x,v+y))
-    	return result
+		return result
 	
 	
 	def rotateImage(self, image, angle):
@@ -102,17 +102,18 @@ class Image:
   		return result
 	
 	
-	def alignEyes(self, epsilon, *args):
+	def alignEyes(self, *args):
 		'''args has images'''
 		aligned = {}
 		for filename in args:
 			image = self.getImg(filename)
-			corners = self.HarrisCornerDetect(filename)
-			if len(corners) == 2:
-				if (corners[0][0] - corners[1][0]) > epsilon:
+			corners = self.ShiTomasiCornerDetect(filename)
+			if len(corners) is 2:
+				if (corners[0][0] - corners[1][0]) is not 0:
 					tangent = (corners[0][1] - corners[1][1])/(corners[0][0] - corners[1][0])
 					angle = math.degrees(math.atan(tangent))
 					aligned[filename] = self.rotateImage(image, angle)
+				else: aligned[filename] = image
 			else: aligned[filename] = image
 		return aligned
 				
@@ -151,7 +152,7 @@ if __name__ == '__main__':
 		images = []
 		for filename in glob.glob(str(os.getcwd()) + '/male/*.bmp'):
 			images.append(filename)
-		aligned = eye.alignEyes(1, *images)
+		aligned = eye.alignEyes(*images)
 		cropped = face.cropImg(*aligned)
 		face.saveImg(str(os.getcwd()) + '/cropped', *cropped)
 		
