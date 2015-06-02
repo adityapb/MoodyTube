@@ -83,16 +83,15 @@ class Image:
 	def ShiTomasiCornerDetect(self, filename):
 		img = self.getImg(filename)
 		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-		total_corners = []
+		result = []
 		for filename, list_of_parameters in self.identify(filename):
 			for (x, y, w, h) in list_of_parameters:
-				corners = cv2.goodFeaturesToTrack(gray,1,0.01,10)
+				corners = cv2.goodFeaturesToTrack(gray[y:y+h , x:x+w],1,0.01,10)
 				total_corners.append(np.int0(corners))
-		for corners in total_corners:
-			for i in corners:
-    			x,y = i.ravel()
-    			cv2.circle(img,(x,y),3,255,-1)
-    	pass
+				for i in corners:
+					u,v = i.ravel()
+					result.append((u+x,v+y))
+    	return result
 	
 	
 	def rotateImage(self, image, angle):
