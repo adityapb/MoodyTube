@@ -54,7 +54,7 @@ class Image:
 			cv2.imwrite(str(i) + '.bmp' , image)
 		return
 		
-	def cornerDetect(self, filename):
+	def HarrisCornerDetect(self, filename):
 		gray = cv2.cvtColor(self.getImg(filename),cv2.COLOR_BGR2GRAY)
 		gray = np.float32(gray)
 		dst = cv2.cornerHarris(gray,2,3,0.04)
@@ -77,9 +77,23 @@ class Image:
 							Y += j
 							count += 1
 							#print i, j
-				if count != 0: corners.append([X/count , Y/count])
+				if count is not 0: corners.append([X/count , Y/count])
 		return corners
 		
+	def ShiTomasiCornerDetect(self, filename):
+		img = self.getImg(filename)
+		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+		total_corners = []
+		for filename, list_of_parameters in self.identify(filename):
+			for (x, y, w, h) in list_of_parameters:
+				corners = cv2.goodFeaturesToTrack(gray,1,0.01,10)
+				total_corners.append(np.int0(corners))
+		for corners in total_corners:
+			for i in corners:
+    			x,y = i.ravel()
+    			cv2.circle(img,(x,y),3,255,-1)
+    	pass
+	
 	
 	def rotateImage(self, image, angle):
   		image_center = tuple(np.array(image.shape)/2)
@@ -94,7 +108,7 @@ class Image:
 		aligned = {}
 		for filename in args:
 			image = self.getImg(filename)
-			corners = self.cornerDetect(filename)
+			corners = self.HarrisCornerDetect(filename)
 			if len(corners) == 2:
 				if (corners[0][0] - corners[1][0]) > epsilon:
 					tangent = (corners[0][1] - corners[1][1])/(corners[0][0] - corners[1][0])

@@ -23,13 +23,13 @@ class Training:
 	def IdError(self, image):
 		'''Use primitive way of saving the image'''
 		for filename, list_of_parameters in self.face.identify(image).iteritems():
-			if len(list_of_parameters) != 1: raise Exception('Identification error for face')
+			if len(list_of_parameters) is not 1: raise Exception('Identification error for face')
 			for (x, y, w, h) in list_of_parameters:
 				return cv2.imread(image)[y:y+h , x:x+w]
 		
 	def nose_center(self, image):
 		for filename, list_of_parameters in self.nose.identify(image).iteritems():
-			if len(list_of_parameters) != 1:
+			if len(list_of_parameters) is not 1:
 				#self.IdError(image)
 				return None
 			for (x, y, w, h) in list_of_parameters:
@@ -37,7 +37,7 @@ class Training:
 				
 	def faceIdentify(self, image):
 		for filename, list_of_parameters in self.face.identify(image).iteritems():
-			if len(list_of_parameters) != 1:
+			if len(list_of_parameters) is not 1:
 				#self.IdError(image)
 				return None
 			for (x, y, w, h) in list_of_parameters:
