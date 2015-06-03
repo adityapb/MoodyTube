@@ -22,13 +22,14 @@ class Training:
 		self.face = Image(face_cascade)
 		self.eye = Image(eye_cascade)
 		
-	def alignedImage(self, image):
+	def alignImage(self, PATH, image):
 		for filename, image in self.eye.alignEyes(image).iteritems():
+			self.save(PATH, **{filename : image})
 			return image
 		
 	def IdError(self, image):
 		'''Use primitive way of saving the image'''
-		image = self.alignedImage(image)
+		#image = self.alignedImage(image)
 		for filename, list_of_parameters in self.face.identify(image).iteritems():
 			if len(list_of_parameters) is not 1: raise Exception('Identification error for face')
 			for (x, y, w, h) in list_of_parameters:
@@ -53,7 +54,7 @@ class Training:
 	def alignFace(self, image):
 		'''(nose_x, nose_y) = self.nose_center(image)
 		(height, length) = self.faceIdentify(image)'''
-		image = self.alignedImage(image)
+		#image = self.alignedImage(image)
 		center = self.nose_center(image)
 		dimensions = self.faceIdentify(image)
 		try:
@@ -71,21 +72,25 @@ class Training:
 		except:
 			return self.IdError(image)
 		
-	def save(self, PATH, *args):
+	def save(self, PATH, **kwargs):
 		os.chdir(PATH)
-		for i, image in enumerate(args):
+		for filename, image in kwargs.iteritems():
 			if image is not None:
-				print "Saved {0} image".format(i)
-				cv2.imwrite(str(i) + '.bmp' , image)
+				print "Saved {0} image".format(filename)
+				cv2.imwrite(filename , image)
 			else:
-				print "Not saved {0}".format(i)
+				print "Not saved {0}".format(filename)
 		return
 			
 if __name__ == '__main__':
 	BASE_PATH = os.path.dirname(os.path.realpath(sys.argv[0]))
-	t = Training(sys.argv[1], sys.argv[2])
-	images = []
+	t = Training(sys.argv[1], sys.argv[2], sys.argv[3])
+	images = {}
 	for filename in glob.glob(BASE_PATH + '/male/*.bmp'):
-		images.append(t.crop(filename))
-	t.save(BASE_PATH + '/cropped', *images)
+		t.alignImage(BASE_PATH, filename)
+	#t.save(BASE_PATH + '/cropped', *images)
+	
+	for filename in glob.glob(BASE_PATH + '/male/*.bmp'):
+		images[filename] = t.crop(filename)
+	t.save(BASE_PATH, **images)
 	
