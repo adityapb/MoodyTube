@@ -1,5 +1,5 @@
 # MoodyTube
-**A Django-Powered website that play's music according to your mood**
+**A Django powered website that play's music according to your mood**
 ##Music Player:
 We have used last.fm's API that allows to access their database with songs sorted by tags. Then these songs are searched on YouTube using their Data API and the first result is considered.
 ##Mood Detection:
