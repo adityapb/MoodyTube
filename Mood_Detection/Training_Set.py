@@ -86,11 +86,11 @@ if __name__ == '__main__':
 	BASE_PATH = os.path.dirname(os.path.realpath(sys.argv[0]))
 	t = Training(sys.argv[1], sys.argv[2], sys.argv[3])
 	images = {}
-	for filename in glob.glob(BASE_PATH + '/male/*.bmp'):
+	for filename in glob.glob(BASE_PATH + '/sad/*.JPG'):
 		t.alignImage(BASE_PATH, filename)
 	#t.save(BASE_PATH + '/cropped', *images)
 	
-	for filename in glob.glob(BASE_PATH + '/male/*.bmp'):
+	for filename in glob.glob(BASE_PATH + '/sad/*.JPG'):
 		images[filename] = t.crop(filename)
 	t.save(BASE_PATH, **images)
 	

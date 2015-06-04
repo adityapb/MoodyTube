@@ -48,13 +48,15 @@ class Mood_Detect():
 		'''Use Shi-Tomasi corner detection'''
 		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 		result = []
-		if len(self.identify(self.eye, img)) is 2:
-			for (x, y, w, h) in eyes:
-				corners = cv2.goodFeaturesToTrack(gray[y:y+h , x:x+w],1,0.01,10)
-				corners = np.int0(corners)
-				for i in corners:
-					u,v = i.ravel()
-					result.append((u+x, v+y))
+		for (p, q, r, s) in self.identify(self.face, img):
+			eyes = self.identify(self.eye, img[q:q+s , p:p+r])
+			if len(eyes) is 2:
+				for (x, y, w, h) in eyes:
+					corners = cv2.goodFeaturesToTrack(gray[y:y+h , x:x+w],1,0.01,10)
+					corners = np.int0(corners)
+					for i in corners:
+						u,v = i.ravel()
+						result.append((u+x+p, v+y+q))
 		else:
 			return img
 		angle = self.GetAngle(corners)
