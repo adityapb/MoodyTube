@@ -119,7 +119,7 @@ class Image:
 	def rotateImage(self, image, angle):
   		image_center = tuple(np.array(image.shape)/2)
   		rot_mat = cv2.getRotationMatrix2D((image_center[0], image_center[1]),angle,1.0)
-  		result = cv2.warpAffine(image, rot_mat, (image.shape[0], image.shape[1]),flags=cv2.INTER_LINEAR)
+  		result = cv2.warpAffine(image, rot_mat, (int(math.sqrt(pow(image.shape[0],2) + pow(image.shape[1],2))), int(math.sqrt(pow(image.shape[0],2) + pow(image.shape[1],2)))),flags=cv2.INTER_LINEAR)
   		#result = cv2.resize(result, tuple(reversed(image.shape[:2])))
   		return result
 	
@@ -184,5 +184,5 @@ if __name__ == '__main__':
 		
 	if 'testalign' in sys.argv:
 		eye = Image(str(os.getcwd()) + '/haarcascades/haarcascade_eye.xml')
-		eye.testAlignment(str(os.getcwd()) + '/aditi.jpg')
+		eye.testAlignment(str(os.getcwd()) + '/1.jpg')
 	
