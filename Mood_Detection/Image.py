@@ -55,32 +55,6 @@ class Image:
 			cv2.imwrite(str(i) + '.bmp' , image)
 		return
 		
-	def HarrisCornerDetect(self, filename):
-		gray = cv2.cvtColor(self.getImg(filename),cv2.COLOR_BGR2GRAY)
-		gray = np.float32(gray)
-		dst = cv2.cornerHarris(gray,2,3,0.04)
-		#(x, y, w, h) = identify(img)
-		#result is dilated for marking the corners, not important
-		dst = cv2.dilate(dst,None)
-		# Threshold for an optimal value, it may vary depending on the image.
-		#if i, j lies in y:y+h , x:x+w; use those coordinates
-		corners= []
-		for filename, list_of_parameters in self.identify(filename).iteritems():
-			for (x, y, w, h) in list_of_parameters:
-				count = 0.
-				X = 0
-				Y = 0
-				for i in range(y, y+h):
-					for j in range(x, x+w):
-						#print i, j
-						if dst[i][j] > 0.5*dst.max():
-							X += i
-							Y += j
-							count += 1
-							#print i, j
-				if count is not 0: corners.append([X/count , Y/count])
-		return corners
-		
 	def ShiTomasiCornerDetect(self, filename):
 		img = self.getImg(filename)
 		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -138,46 +112,10 @@ class Image:
 				else: aligned[filename] = image
 			else: aligned[filename] = image
 		return aligned
-				
-				
-	def alignImg(self, *args):
-		'''Align eyes and mouth in all images
-		First rotate the images to align the eyes
-		Then change (x,y,w,h) to align all the eyes in the dataset to a fixed point'''
-		pass
-
-	def average(self, *args):
-		'''Find average of all images in args'''
-		pass
-		
-
+			
 			
 if __name__ == '__main__':
-	if 'crop' in sys.argv:
-		img = Image(str(os.getcwd()) + '/haarcascades/haarcascade_frontalface_alt.xml')
-		BASE_IMG_PATH = str(sys.argv[2])
-		images = []
-		for filename in glob.glob(BASE_IMG_PATH + '/*.bmp'):
-			images.append(filename)
-		cropped = img.cropImg(*images)
-		img.saveImg(str(os.getcwd()) + '/cropped', *cropped)
-		
-	if 'rotate' in sys.argv:
-		x = Image()
-		img = x.rotateImage(cv2.imread(str(os.getcwd()) + '/male/EMBmale20happy.bmp'), 45)
-		cv2.imshow('rotated', img)
-		cv2.waitKey(0)
 	
-	if 'align' in sys.argv:
-		eye = Image(str(os.getcwd()) + '/haarcascades/haarcascade_eye.xml')
-		face = Image(str(os.getcwd()) + '/haarcascades/haarcascade_frontalface_alt.xml')
-		images = []
-		for filename in glob.glob(str(os.getcwd()) + '/male/*.bmp'):
-			images.append(filename)
-		aligned = eye.alignEyes(*images)
-		cropped = face.cropImg(*aligned)
-		face.saveImg(str(os.getcwd()) + '/cropped', *cropped)
-		
 	if 'test' in sys.argv:
 		eye = Image(str(os.getcwd()) + '/haarcascades/haarcascade_eye.xml')
 		eye.testCornerDetect(str(os.getcwd()) + '/aditi.jpg')

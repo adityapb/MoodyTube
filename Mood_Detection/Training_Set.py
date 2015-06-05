@@ -5,6 +5,7 @@ Consider image alignment by eye detection using Shi-Tomasi corner detection algo
 
 
 from Image import Image
+from PreProcessing import PreProcessing
 import cv2
 import glob
 import math
@@ -86,11 +87,15 @@ if __name__ == '__main__':
 	BASE_PATH = os.path.dirname(os.path.realpath(sys.argv[0]))
 	t = Training(sys.argv[1], sys.argv[2], sys.argv[3])
 	images = {}
-	for filename in glob.glob(BASE_PATH + '/sad/*.JPG'):
+	for filename in glob.glob(BASE_PATH + '/male/*.bmp'):
 		t.alignImage(BASE_PATH, filename)
 	#t.save(BASE_PATH + '/cropped', *images)
 	
-	for filename in glob.glob(BASE_PATH + '/sad/*.JPG'):
-		images[filename] = t.crop(filename)
+	for filename in glob.glob(BASE_PATH + '/male/*.bmp'):
+		image = t.crop(filename)
+		p = PreProcessing()
+		image = p.gray(image)
+		image = p.histogram_equalize(image)
+		images[filename] = p.gamma_correction(0.5,image)
 	t.save(BASE_PATH, **images)
 	
