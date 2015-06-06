@@ -49,7 +49,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 TEMPLATE_DIRS = (
-    str(os.getcwd()) + '/Templates',
+    os.path.dirname(os.path.realpath(sys.argv[0])) + '/Templates',
 )
 
 ROOT_URLCONF = 'MoodyTube.urls'
