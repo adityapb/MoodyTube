@@ -1,7 +1,14 @@
 #!/usr/bin/python
 
-'''Faces will be detected such that the centre of the nose is at the centre of the face
-Consider image alignment by eye detection using Shi-Tomasi corner detection algorithm'''
+'''
+Faces will be detected such that the centre of the nose is at the centre of the face
+Consider image alignment by eye detection using Shi-Tomasi corner detection algorithm
+
+1. Align the image
+2. Find the distance between the centre of the eyes and upper bound of the sample image
+3. Resize the image so that the distance between the eyes is equal to that of the sample
+4. The centre of the eyes should match the centre of the sample
+'''
 
 
 from Image import Image
@@ -16,34 +23,39 @@ import numpy as np
 
 
 class Training:
-	
-	def __init__(self, nose_cascade = None, face_cascade = None, eye_cascade = None):
+
+	def __init__(self, nose_cascade = None, face_cascade = None, eye_cascade = None, sample = None):
 		#if nose_cascade or face_cascade is None: warnings.warn('Some of the cascades are still None')
 		self.nose = Image(nose_cascade)
 		self.face = Image(face_cascade)
 		self.eye = Image(eye_cascade)
-		
+		self.dimensions = self.GetDimensions(sample)
+
 	def alignImage(self, PATH, image):
 		for filename, image in self.eye.alignEyes(image).iteritems():
 			self.save(PATH, **{filename : image})
 			return image
-		
+
+	def GetDimensions(self, filename):
+		centre = self.GetCentre(filename)
+		#return (up, down, left, right)
+		try:
+			return (img.shape[1] - centre[1], centre[1], centre[0], img.shape[0] - centre[0])
+		except:
+			return None
+
+	def GetCentre(self, filename):
+		img = cv2.imread(filename)
+		eye = self.eye.ShiTomasiCornerDetect(filename)
+		try:
+			return ((eye[0][0]+eye[1][0])/2., eye[0][1])
+		except:
+			return None
+
 	def IdError(self, image):
-		'''Use primitive way of saving the image'''
-		#image = self.alignedImage(image)
-		for filename, list_of_parameters in self.face.identify(image).iteritems():
-			if len(list_of_parameters) is not 1: raise Exception('Identification error for face')
-			for (x, y, w, h) in list_of_parameters:
-				return cv2.imread(image)[y:y+h , x:x+w]
-		
-	def nose_center(self, image):
-		for filename, list_of_parameters in self.nose.identify(image).iteritems():
-			if len(list_of_parameters) is not 1:
-				#self.IdError(image)
-				return None
-			for (x, y, w, h) in list_of_parameters:
-				return (x + (w/2.) , y + (h/2.))
-				
+		'''Delete the image'''
+		os.remove(image)
+
 	def faceIdentify(self, image):
 		for filename, list_of_parameters in self.face.identify(image).iteritems():
 			if len(list_of_parameters) is not 1:
@@ -51,28 +63,32 @@ class Training:
 				return None
 			for (x, y, w, h) in list_of_parameters:
 				return (w, h)
-				
+
 	def alignFace(self, image):
-		'''(nose_x, nose_y) = self.nose_center(image)
-		(height, length) = self.faceIdentify(image)'''
+		'''
+		x -> left
+		y -> down
+		w -> right + left
+		h -> up + down
+		'''
 		#image = self.alignedImage(image)
-		center = self.nose_center(image)
-		dimensions = self.faceIdentify(image)
+		centre = self.GetCentre(image)
+		dim = self.dimensions
 		try:
-			return (center[0] - (dimensions[0]/2.),
-					center[1] - (dimensions[1]/2.), 
-					dimensions[0], 
-					dimensions[1])
+			return (centre[0] - dim[2],
+					centre[1] - dim[1],
+					dim[2] + dim[3],
+					dim[0] + dim[1])
 		except:
 			return None
-				
+
 	def crop(self, image):
 		x = self.alignFace(image)
 		try:
 			return self.face.getImg(image)[x[1]:x[1]+x[3] , x[0]:x[0]+x[2]]
 		except:
 			return self.IdError(image)
-		
+
 	def save(self, PATH, **kwargs):
 		os.chdir(PATH)
 		for filename, image in kwargs.iteritems():
@@ -82,15 +98,15 @@ class Training:
 			else:
 				print "Not saved {0}".format(filename)
 		return
-			
+
 if __name__ == '__main__':
 	BASE_PATH = os.path.dirname(os.path.realpath(sys.argv[0]))
-	t = Training(sys.argv[1], sys.argv[2], sys.argv[3])
+	t = Training(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
 	images = {}
 	for filename in glob.glob(BASE_PATH + '/male/*.bmp'):
 		t.alignImage(BASE_PATH, filename)
 	#t.save(BASE_PATH + '/cropped', *images)
-	
+
 	for filename in glob.glob(BASE_PATH + '/male/*.bmp'):
 		image = t.crop(filename)
 		p = PreProcessing()
@@ -98,4 +114,3 @@ if __name__ == '__main__':
 		image = p.histogram_equalize(image)
 		images[filename] = p.gamma_correction(0.5,image)
 	t.save(BASE_PATH, **images)
-	
