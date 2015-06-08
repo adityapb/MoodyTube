@@ -7,6 +7,9 @@
 
 #Tests
 test.py
+eye.py
+average.py
+mouth.py
 
 #Training set
 *.bmp
@@ -19,6 +22,3 @@ test.py
 #others
 *.txt
 *.sqlite3
-eye.py
-average.py
-mouth.py
