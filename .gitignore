@@ -15,6 +15,7 @@ mouth.py
 *.bmp
 *.jpg
 *.JPG
+!sample.bmp
 
 #others
 *.txt
