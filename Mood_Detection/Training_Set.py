@@ -29,18 +29,29 @@ class Training:
 		self.nose = Image(nose_cascade)
 		self.face = Image(face_cascade)
 		self.eye = Image(eye_cascade)
-		self.dimensions = self.GetDimensions(sample)
+		val = self.GetDimensions(sample)
+		self.dimensions = val['dimensions']
+		self.dist = val['distance']
 
 	def alignImage(self, PATH, image):
-		for filename, image in self.eye.alignEyes(image).iteritems():
-			self.save(PATH, **{filename : image})
-			return image
+		try:
+			for filename, image in self.eye.alignEyes(image).iteritems():
+				self.save(PATH, **{filename : image})
+				return image
+		except:
+			try:
+				os.remove(image)
+			except:
+				pass
 
 	def GetDimensions(self, filename):
-		centre = self.GetCentre(filename)
+		img = cv2.imread(filename)
+		val = self.GetCentre(filename)
+		centre = val['centre']
 		#return (up, down, left, right)
 		try:
-			return (img.shape[1] - centre[1], centre[1], centre[0], img.shape[0] - centre[0])
+			return {'dimensions' : (img.shape[1] - centre[1], centre[1], centre[0], img.shape[0] - centre[0]),
+					'distance' : val['dist']}
 		except:
 			return None
 
@@ -48,13 +59,25 @@ class Training:
 		img = cv2.imread(filename)
 		eye = self.eye.ShiTomasiCornerDetect(filename)
 		try:
-			return ((eye[0][0]+eye[1][0])/2., eye[0][1])
+			return {'centre' : ((eye[0][0]+eye[1][0])/2., eye[0][1]), 'dist' : abs(eye[0][0]-eye[1][0])}
 		except:
 			return None
 
 	def IdError(self, image):
 		'''Delete the image'''
-		os.remove(image)
+		try:
+			os.remove(image)
+		except:
+			pass
+
+	def Resize(self, filename):
+		try:
+			dist = self.GetCentre(filename)['dist']
+		except:
+			os.remove(filename)
+			return
+		scaleFactor = self.dist/float(dist)
+		return cv2.resize(cv2.imread(filename), (0,0), fx = scaleFactor, fy = scaleFactor)
 
 	def faceIdentify(self, image):
 		for filename, list_of_parameters in self.face.identify(image).iteritems():
@@ -72,8 +95,11 @@ class Training:
 		h -> up + down
 		'''
 		#image = self.alignedImage(image)
-		centre = self.GetCentre(image)
-		dim = self.dimensions
+		try:
+			centre = self.GetCentre(image)['centre']
+			dim = self.dimensions
+		except:
+			self.IdError(image)
 		try:
 			return (centre[0] - dim[2],
 					centre[1] - dim[1],
@@ -87,7 +113,8 @@ class Training:
 		try:
 			return self.face.getImg(image)[x[1]:x[1]+x[3] , x[0]:x[0]+x[2]]
 		except:
-			return self.IdError(image)
+			self.IdError(image)
+			return None
 
 	def save(self, PATH, **kwargs):
 		os.chdir(PATH)
@@ -106,11 +133,15 @@ if __name__ == '__main__':
 	for filename in glob.glob(BASE_PATH + '/male/*.bmp'):
 		t.alignImage(BASE_PATH, filename)
 	#t.save(BASE_PATH + '/cropped', *images)
-
+	print "Done aligning..."
+	for filename in glob.glob(BASE_PATH + '/male/*.bmp'):
+		image = t.Resize(filename)
+		t.save(BASE_PATH, **{filename : image})
 	for filename in glob.glob(BASE_PATH + '/male/*.bmp'):
 		image = t.crop(filename)
-		p = PreProcessing()
+		images[filename] = image
+		'''p = PreProcessing()
 		image = p.gray(image)
 		image = p.histogram_equalize(image)
-		images[filename] = p.gamma_correction(0.5,image)
+		images[filename] = p.gamma_correction(0.5,image)'''
 	t.save(BASE_PATH, **images)

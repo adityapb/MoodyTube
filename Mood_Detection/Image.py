@@ -105,13 +105,15 @@ class Image:
 		for filename in args:
 			image = self.getImg(filename)
 			corners = self.ShiTomasiCornerDetect(filename)
+			if corners is None:
+				os.remove(filename)
+				return None
 			if len(corners) is 2:
 				if (corners[0][0] - corners[1][0]) is not 0:
 					tangent = (corners[0][1] - corners[1][1])/float(corners[0][0] - corners[1][0])
 					angle = math.degrees(math.atan(tangent))
 					aligned[filename] = self.rotateImage(image, angle)
-				else: aligned[filename] = image
-			else: aligned[filename] = image
+			else: return None
 		return aligned
 
 
