@@ -16,9 +16,6 @@ mouth.py
 *.jpg
 *.JPG
 
-#haarcascades
-*.xml
-
 #others
 *.txt
 *.sqlite3
