@@ -139,7 +139,10 @@ if __name__ == '__main__':
 		t.save(BASE_PATH, **{filename : image})
 	for filename in glob.glob(BASE_PATH + '/male/*.bmp'):
 		image = t.crop(filename)
-		images[filename] = image
+		try:
+			images[filename] = cv2.resize(image, (50,50))
+		except:
+			t.IdError(filename)
 		'''p = PreProcessing()
 		image = p.gray(image)
 		image = p.histogram_equalize(image)
