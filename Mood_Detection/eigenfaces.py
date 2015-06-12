@@ -16,7 +16,6 @@ class PCA:
 		
 	def eigenfaces(self, K):
 		faces = []
-		res = []
 		eig = self.eigenvectors()
 		eigenvals = heapq.nlargest(K, eig)
 		print eigenvals
@@ -27,12 +26,7 @@ class PCA:
 		return faces
 			
 	def rowVec(self, image):
-		'''image is grayscale image'''
-		result = np.array([])
-		for row in image:
-			#print row
-			result = np.concatenate([result, row])
-		return result
+		return image.flatten()
 		
 	def reconstruct(self, vec, length = None):
 		if length is None: length = self.length
@@ -48,7 +42,9 @@ class PCA:
 		return np.array(mat)
 		
 	def covMat(self):
-		return np.cov(self.imageMat().T)
+		mat = self.imageMat()
+		print np.dot(mat.T, mat)/float(np.linalg.norm(mat))
+		return np.dot(mat.T, mat)/float(np.linalg.norm(mat))
 		
 	def eigenvectors(self):
 		res = {}
@@ -60,9 +56,9 @@ class PCA:
 if __name__ == '__main__':
 	if 'test' in sys.argv:
 		filenames = []
-		for filename in glob.glob(os.getcwd() + '/male/*.bmp'):
+		for filename in glob.glob(os.getcwd() + '/Data/happy_100_male/*.bmp'):
 			print filename
 			filenames.append(cv2.cvtColor(cv2.imread(filename), cv2.COLOR_BGR2GRAY))
-		p = PCA(50, *filenames)
+		p = PCA(100, *filenames)
 		print p.eigenfaces(3)
 	
