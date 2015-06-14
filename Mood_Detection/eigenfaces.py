@@ -43,7 +43,6 @@ class PCA:
 		
 	def covMat(self):
 		mat = self.imageMat()
-		print np.dot(mat.T, mat)/float(np.linalg.norm(mat))
 		return np.dot(mat.T, mat)/float(np.linalg.norm(mat))
 		
 	def eigenvectors(self):
