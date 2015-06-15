@@ -11,11 +11,20 @@ class Mood_Detect():
 		self.eye = Image(eye_cascade)
 		
 	def GetImage(self, port):
+		'''
+		When two eyes and face are detected, capture the image
+		'''
 		cam_port = port
 		cam = cv2.VideoCapture(port)
-		ret, image = cam.read()
-		del(cam)
-		return image
+		while True:
+			ret, image = cam.read()
+			face = self.identify(self.face, image)
+			if len(face) is 1:
+				for parameters in face:
+					for (x, y, w, h) in parameters:
+						if len(self.identify(self.eye, image[y:y+h, x:x+w]) is 2:
+							del(cam)
+							return image
 		
 	def IdError(self, img):
 		face = self.identify(self.face, img)
@@ -23,7 +32,7 @@ class Mood_Detect():
 		for (x, y, w, h) in face:
 			return img[y:y+h , x:x+w]
 		
-	def identify(self, cascade, img):
+	def identify(self, cascade, image):
 		Cascade = cv2.CascadeClassifier(cascade)
 		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 		objects = []
