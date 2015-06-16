@@ -20,3 +20,6 @@ mouth.py
 #others
 *.txt
 *.sqlite3
+Mood_Detection/Data/
+Mood_Detection/test_pca/
+
