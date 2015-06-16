@@ -2,6 +2,9 @@
 
 from Image import Image
 import cv2
+import sys
+import numpy as np
+import math
 
 class Mood_Detect():
 	
@@ -18,24 +21,23 @@ class Mood_Detect():
 		cam = cv2.VideoCapture(port)
 		while True:
 			ret, image = cam.read()
-			face = self.identify(self.face, image)
+			face = self.identify(sys.argv[2], image)
 			if len(face) is 1:
-				for parameters in face:
-					for (x, y, w, h) in parameters:
-						if len(self.identify(self.eye, image[y:y+h, x:x+w]) is 2:
-							del(cam)
-							return image
+				for x in face:
+					if len(self.identify(sys.argv[3], image[x[1]:x[1]+x[3], x[0]:x[0]+x[2]])) is 2:
+						del(cam)
+						return self.AlignEyes(image)
 		
 	def IdError(self, img):
 		face = self.identify(self.face, img)
-		if len(face) in not 1: raise Exception('Error in detection')
+		if len(face) is not 1: raise Exception('Error in detection')
 		for (x, y, w, h) in face:
 			return img[y:y+h , x:x+w]
 		
 	def identify(self, cascade, image):
 		Cascade = cv2.CascadeClassifier(cascade)
 		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-		objects = []
+		result = []
 		objects = Cascade.detectMultiScale(
 		    gray,
 		    scaleFactor=1.1,
@@ -44,9 +46,9 @@ class Mood_Detect():
 		    flags = cv2.cv.CV_HAAR_SCALE_IMAGE
 		)
 		print "Found {0} objects!".format(len(objects))
-		for (x, y, w, h) in objects:
-			objects.append((x, y, w, h))
-		return objects
+		for parameters in objects:
+			result.append(parameters)
+		return result
 		
 	def GetAngle(self, corners):
 		tangent = (corners[0][1] - corners[1][1])/float(corners[0][0] - corners[1][0])
@@ -57,8 +59,8 @@ class Mood_Detect():
 		'''Use Shi-Tomasi corner detection'''
 		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 		result = []
-		for (p, q, r, s) in self.identify(self.face, img):
-			eyes = self.identify(self.eye, img[q:q+s , p:p+r])
+		for (p, q, r, s) in self.identify(sys.argv[2], img):
+			eyes = self.identify(sys.argv[3], img[q:q+s , p:p+r])
 			if len(eyes) is 2:
 				for (x, y, w, h) in eyes:
 					corners = cv2.goodFeaturesToTrack(gray[y:y+h , x:x+w],1,0.01,10)
@@ -66,9 +68,8 @@ class Mood_Detect():
 					for i in corners:
 						u,v = i.ravel()
 						result.append((u+x+p, v+y+q))
-		else:
-			return img
-		angle = self.GetAngle(corners)
+		print result
+		angle = self.GetAngle(result)
 		return self.eye.rotateImage(img, angle)
 		
 	def GetNose(self, img):
@@ -102,5 +103,10 @@ class Mood_Detect():
 			return img[x[1]:x[1]+x[3] , x[0]:x[0]+x[2]]
 		except:
 			return self.IdError(img)
+			
+if __name__ == '__main__':
+	p = Mood_Detect(sys.argv[1], sys.argv[2], sys.argv[3])
+	cv2.imshow('face', p.GetImage(0))
+	cv2.waitKey(0)
 			
 			
