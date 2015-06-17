@@ -76,14 +76,9 @@ class PCA():
 		imageops.make_image(avgvals,"average.png",(imgwdth,imght))               
         #substract avg val from each orig val to get adjusted faces(phi of T&P)     
 		adjfaces=facemat-avgvals        
-                
 		adjfaces_tr=adjfaces.transpose()
-        
 		L=dot(adjfaces , adjfaces_tr)
-
-		evals1,evects1=eigh(L)
-        #to use svd ,comment out the previous line and uncomment the next
-        #evects1,evals1,vt=svd(L,0)        
+		evals1,evects1=eigh(L)        
 		reversedevalueorder=evals1.argsort()[::-1]
 		evects=evects1[:,reversedevalueorder]               
 		evals=sort(evals1)[::-1]                
@@ -111,6 +106,14 @@ class PCA():
 			imgname=egndir+"/eigenface"+str(x)+".png"            
 			faces.append(imageops.make_image(eigenspace[x],imgname,(self.bundle.wd,self.bundle.ht)))
 		return faces
+		
+	def calculateWeights(self,selectedfacesnum):
+		'''Each row of wts is weight for corresponding adjface'''
+		eigenfaces = self.bundle.eigenfaces
+		adjfaces = self.bundle.adjfaces
+		usub=eigenfaces[:selectedfacesnum,:]        
+		wts=dot(usub,adjfaces.transpose()).transpose()                         
+		return wts
         
 if __name__ == '__main__':
 	P = PCA()
@@ -118,4 +121,5 @@ if __name__ == '__main__':
 	for filename in glob.glob(sys.argv[1] + '/*.bmp'):
 		files.append(filename)
 	eigenfaces = P.createFaceVal(files)
+	print P.calculateWeights(5)
 		
