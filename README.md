@@ -14,3 +14,10 @@ Sample image considered in this case:<br>
 ![Sample image](/Screenshots/sample.bmp)<br><br>
 **The training set images are then cropped so that eyes each of the training set image coincides with eyes of the sample image**<br>
 For this, coordinates of the midpoint of the eyes is calculated relative to the border of the sample image. The image is cropped along the border calculated according to midpoint of the eyes of sample image.
+###2. PCA:
+**Eigenfaces are calculated for training set and each image is reconstructed in eigenspace. The weights are then used to train an SVM**<br>
+Example of eigenfaces used in this case:<br>
+![eigenface0](/Screenshots/eigenface0.png)
+![eigenface1](/Screenshots/eigenface1.png)
+![eigenface2](/Screenshots/eigenface2.png)
+
