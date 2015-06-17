@@ -12,6 +12,7 @@ average.py
 mouth.py
 
 #Training set
+*.png
 *.bmp
 *.jpg
 *.JPG
