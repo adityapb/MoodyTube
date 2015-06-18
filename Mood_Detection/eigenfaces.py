@@ -131,6 +131,15 @@ class PCA():
 		if mindist < thresholdvalue:
 			result=self.bundle.imglist[idx]
 		return mindist,result
+		
+	def validateselectedimage(self,imgname):                     
+		selectimg=imageops.XImage(imgname)
+		selectwdth=selectimg._width
+		selectht=selectimg._height        
+		if((selectwdth!=self.bundle.wd) or (selectht!=self.bundle.ht)):
+			raise ImageError("select image of correct size !")
+		else:
+			return selectimg
         
 if __name__ == '__main__':
 	P = PCA()
