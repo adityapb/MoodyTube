@@ -56,7 +56,7 @@ class PCA():
 		return imgfilelist
 
 	def createFaceVal(self, imglist):
-		imgfilelist=self.validateDirectory(imglist)        
+		imgfilelist=self.validateDirectory(imglist)
 		img=imgfilelist[0]
 		imgwdth=img._width
 		imght=img._height
@@ -114,6 +114,23 @@ class PCA():
 		usub=eigenfaces[:selectedfacesnum,:]        
 		wts=dot(usub,adjfaces.transpose()).transpose()                         
 		return wts
+		
+	def findmatchingimage(self,imagename,selectedfacesnum,thresholdvalue):        
+		selectimg=self.validateselectedimage(imagename)
+		inputfacepixels=selectimg._pixellist
+		inputface=asfarray(inputfacepixels)
+		pixlistmax=max(inputface)
+		inputfacen=inputface/pixlistmax        
+		inputface=inputfacen-self.bundle.avgvals
+		usub=self.bundle.eigenfaces[:selectedfacesnum,:]
+		input_wk=dot(usub,inputface.transpose()).transpose()        
+		dist = ((self.weights-input_wk)**2).sum(axis=1)
+		idx = argmin(dist)
+		mindist=sqrt(dist[idx])
+		result=""
+		if mindist < thresholdvalue:
+			result=self.bundle.imglist[idx]
+		return mindist,result
         
 if __name__ == '__main__':
 	P = PCA()
