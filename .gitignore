@@ -18,6 +18,9 @@ mouth.py
 *.JPG
 !/Screenshots/*
 
+#Tests
+!/Mood_Detection/Tests/*
+
 #others
 *.txt
 *.sqlite3
