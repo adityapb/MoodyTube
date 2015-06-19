@@ -11,13 +11,15 @@ from numpy import argmin
 from numpy.linalg import *
 import imageops
 from os.path import isdir,join,normpath
-from os import listdir,mkdir,getcwd
+from os import listdir,mkdir,getcwd,remove
 from shutil import rmtree
 import pickle
 from math import sqrt
 import cv2
 import sys
 import glob
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class ImageError(Exception):
     pass
@@ -73,6 +75,7 @@ class PCA():
         #create average values ,one for each column(ie pixel)        
 		avgvals=average(facemat,axis=0)        
         #make average faceimage in currentdir just for fun viewing..
+		#if isdir('/average.png'): remove('average.png')
 		imageops.make_image(avgvals,"average.png",(imgwdth,imght))               
         #substract avg val from each orig val to get adjusted faces(phi of T&P)     
 		adjfaces=facemat-avgvals        
@@ -99,7 +102,7 @@ class PCA():
 		egndir='../eigenfaces'        
 		if isdir(egndir):                
 			rmtree(egndir,True)               
-		mkdir(egndir)            
+		mkdir(egndir)
 		numimgs=len(self.bundle.imglist)
 		faces = []
 		for x in range(numimgs):
@@ -107,13 +110,25 @@ class PCA():
 			faces.append(imageops.make_image(eigenspace[x],imgname,(self.bundle.wd,self.bundle.ht)))
 		return faces
 		
-	def calculateWeights(self,selectedfacesnum):
+	def calculateWeights(self,selectedfacesnum,eigenfaces = None,adjfaces = None):
 		'''Each row of wts is weight for corresponding adjface'''
-		eigenfaces = self.bundle.eigenfaces
-		adjfaces = self.bundle.adjfaces
+		setWeights0, setWeights1 = False, False
+		if eigenfaces is None:
+			eigenfaces = self.bundle.eigenfaces
+			setWeights0 = True
+		if adjfaces is None:
+			adjfaces = self.bundle.adjfaces
+			setWeights1 = True
 		usub=eigenfaces[:selectedfacesnum,:]        
 		wts=dot(usub,adjfaces.transpose()).transpose()                         
+		if setWeights0 is True and setWeights1 is True: self.weights = wts
 		return wts
+		
+	def createWeightHash(self):
+		weights = {}
+		for i,filename in enumerate(self.bundle.imglist):
+			weights[filename] = self.weights[i]
+		return weights
 		
 	def findmatchingimage(self,imagename,selectedfacesnum,thresholdvalue):        
 		selectimg=self.validateselectedimage(imagename)
@@ -135,17 +150,30 @@ class PCA():
 	def validateselectedimage(self,imgname):                     
 		selectimg=imageops.XImage(imgname)
 		selectwdth=selectimg._width
-		selectht=selectimg._height        
+		selectht=selectimg._height
 		if((selectwdth!=self.bundle.wd) or (selectht!=self.bundle.ht)):
 			raise ImageError("select image of correct size !")
 		else:
 			return selectimg
+			
+	def plot(self):
+		fig = plt.figure()
+		ax = fig.add_subplot(111, projection='3d')
+		w = self.createWeightHash()
+		for key in w:
+			val = w[key]
+			print key
+			if "sad" in key:
+				ax.scatter(val[0], val[1], val[2])
+			if "happy" in key:
+				ax.scatter(val[0], val[1], val[2], c='#FF0000')
+		plt.show()
         
 if __name__ == '__main__':
 	P = PCA()
 	files = []
 	for filename in glob.glob(sys.argv[1] + '/*.bmp'):
 		files.append(filename)
-	eigenfaces = P.createFaceVal(files)
+	P.createFaceVal(files)
 	print P.calculateWeights(5)
 		
