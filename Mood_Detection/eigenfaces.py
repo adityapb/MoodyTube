@@ -167,6 +167,7 @@ class PCA():
 				ax.scatter(val[0], val[1], val[2])
 			if "happy" in key:
 				ax.scatter(val[0], val[1], val[2], c='#FF0000')
+		fig.savefig('plot.png')
 		plt.show()
         
 if __name__ == '__main__':
