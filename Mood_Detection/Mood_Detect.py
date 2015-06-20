@@ -12,6 +12,9 @@ class Mood_Detect():
 		self.nose = Image(nose_cascade)
 		self.face = Image(face_cascade)
 		self.eye = Image(eye_cascade)
+		self.nose_casc = nose_cascade
+		self.face_casc = face_cascade
+		self.eye_casc = eye_cascade
 		
 	def GetImage(self, port):
 		'''
@@ -21,10 +24,10 @@ class Mood_Detect():
 		cam = cv2.VideoCapture(port)
 		while True:
 			ret, image = cam.read()
-			face = self.identify(sys.argv[2], image)
+			face = self.identify(self.face_casc, image)
 			if len(face) is 1:
 				for x in face:
-					if len(self.identify(sys.argv[3], image[x[1]:x[1]+x[3], x[0]:x[0]+x[2]])) is 2:
+					if len(self.identify(self.eye_casc, image[x[1]:x[1]+x[3], x[0]:x[0]+x[2]])) is 2:
 						del(cam)
 						return self.AlignEyes(image)
 		
@@ -59,8 +62,8 @@ class Mood_Detect():
 		'''Use Shi-Tomasi corner detection'''
 		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 		result = []
-		for (p, q, r, s) in self.identify(sys.argv[2], img):
-			eyes = self.identify(sys.argv[3], img[q:q+s , p:p+r])
+		for (p, q, r, s) in self.identify(self.face_casc, img):
+			eyes = self.identify(self.eye_casc, img[q:q+s , p:p+r])
 			if len(eyes) is 2:
 				for (x, y, w, h) in eyes:
 					corners = cv2.goodFeaturesToTrack(gray[y:y+h , x:x+w],1,0.01,10)

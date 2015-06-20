@@ -40,7 +40,7 @@ class Training:
 				return image
 		except:
 			try:
-				os.remove(image)
+				self.IdError(image)
 			except:
 				pass
 
@@ -74,7 +74,7 @@ class Training:
 		try:
 			dist = self.GetCentre(filename)['dist']
 		except:
-			os.remove(filename)
+			self.IdError(image)
 			return
 		scaleFactor = self.dist/float(dist)
 		return cv2.resize(cv2.imread(filename), (0,0), fx = scaleFactor, fy = scaleFactor)
@@ -130,14 +130,14 @@ if __name__ == '__main__':
 	BASE_PATH = os.path.dirname(os.path.realpath(sys.argv[0]))
 	t = Training(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
 	images = {}
-	for filename in glob.glob(BASE_PATH + '/sad/*.JPG'):
+	for filename in glob.glob(BASE_PATH + '/angry/*.JPG'):
 		t.alignImage(BASE_PATH, filename)
 	#t.save(BASE_PATH + '/cropped', *images)
 	print "Done aligning..."
-	for filename in glob.glob(BASE_PATH + '/sad/*.JPG'):
+	for filename in glob.glob(BASE_PATH + '/angry/*.JPG'):
 		image = t.Resize(filename)
 		t.save(BASE_PATH, **{filename : image})
-	for filename in glob.glob(BASE_PATH + '/sad/*.JPG'):
+	for filename in glob.glob(BASE_PATH + '/angry/*.JPG'):
 		image = t.crop(filename)
 		try:
 			images[filename] = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
