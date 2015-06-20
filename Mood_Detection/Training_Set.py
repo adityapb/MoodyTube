@@ -74,7 +74,7 @@ class Training:
 		try:
 			dist = self.GetCentre(filename)['dist']
 		except:
-			self.IdError(image)
+			self.IdError(filename)
 			return
 		scaleFactor = self.dist/float(dist)
 		return cv2.resize(cv2.imread(filename), (0,0), fx = scaleFactor, fy = scaleFactor)
