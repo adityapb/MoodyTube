@@ -21,5 +21,6 @@ Example of eigenfaces used in this case:<br>
 ![eigenface1](/Screenshots/eigenface1.png)
 ![eigenface2](/Screenshots/eigenface2.png)<br>
 Here is an example plot of weights for images reconstructed using 3 eigenfaces:<br>
-![plot](/Screenshots/plot.png)
+![plot](/Screenshots/plot.png)<br>
+The blue points represent sad faces and red points represent happy faces.
 
