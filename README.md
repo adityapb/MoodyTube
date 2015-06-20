@@ -19,5 +19,7 @@ For this, coordinates of the midpoint of the eyes is calculated relative to the 
 Example of eigenfaces used in this case:<br>
 ![eigenface0](/Screenshots/eigenface0.png)
 ![eigenface1](/Screenshots/eigenface1.png)
-![eigenface2](/Screenshots/eigenface2.png)
+![eigenface2](/Screenshots/eigenface2.png)<br>
+Here is an example plot of weights for images reconstructed using 3 eigenfaces:<br>
+![plot](/Screenshots/plot.png)
 
