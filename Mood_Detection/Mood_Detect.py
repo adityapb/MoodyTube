@@ -15,7 +15,7 @@ class Mood_Detect():
 		self.nose_casc = nose_cascade
 		self.face_casc = face_cascade
 		self.eye_casc = eye_cascade
-		val = self.GetDimensions(sample)
+		val = self.GetDimensions(cv2.imread(sample))
 		self.dimensions = val['dimensions']
 		self.dist = val['distance']
 		
@@ -32,7 +32,7 @@ class Mood_Detect():
 				for x in face:
 					if len(self.identify(self.eye_casc, image[x[1]:x[1]+x[3], x[0]:x[0]+x[2]])) is 2:
 						del(cam)
-						return self.AlignEyes(image)
+						return self.crop(image)
 						
 	def GetDimensions(self, img):
 		val = self.GetCentre(img)
@@ -52,7 +52,7 @@ class Mood_Detect():
 			return None
 		
 	def IdError(self, img):
-		face = self.identify(self.face, img)
+		face = self.identify(self.face_casc, img)
 		if len(face) is not 1: raise Exception('Error in detection')
 		for (x, y, w, h) in face:
 			return img[y:y+h , x:x+w]
@@ -78,6 +78,14 @@ class Mood_Detect():
 		angle = math.degrees(math.atan(tangent))
 		return angle
 		
+	def Resize(self, img):
+		try:
+			dist = self.GetCentre(img)['dist']
+		except:
+			return self.IdError(filename)
+		scaleFactor = self.dist/float(dist)
+		return cv2.resize(img, (0,0), fx = scaleFactor, fy = scaleFactor)
+		
 	def GetEyes(self, img):
 		'''Use Shi-Tomasi corner detection'''
 		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -96,7 +104,7 @@ class Mood_Detect():
 	def AlignEyes(self, img):
 		return self.eye.rotateImage(img, self.GetAngle(self.GetEyes(img)))
 			
-	def alignFace(self, image):
+	def alignFace(self, img):
 		'''
 		x -> left
 		y -> down
@@ -104,10 +112,11 @@ class Mood_Detect():
 		h -> up + down
 		'''
 		try:
+			image = self.Resize(self.AlignEyes(img))
 			centre = self.GetCentre(image)['centre']
 			dim = self.dimensions
 		except:
-			self.IdError(image)
+			return self.IdError(img)
 		try:
 			return (centre[0] - dim[2],
 					centre[1] - dim[1],
@@ -121,11 +130,10 @@ class Mood_Detect():
 		try:
 			return image[x[1]:x[1]+x[3] , x[0]:x[0]+x[2]]
 		except:
-			self.IdError(image)
-			return None
+			return self.IdError(image)
 			
 if __name__ == '__main__':
-	p = Mood_Detect(sys.argv[1], sys.argv[2], sys.argv[3])
+	p = Mood_Detect(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
 	cv2.imshow('face', p.GetImage(0))
 	cv2.waitKey(0)
 			
