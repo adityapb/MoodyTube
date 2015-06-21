@@ -28,4 +28,4 @@ test1.py
 *.sqlite3
 Mood_Detection/Data/
 Mood_Detection/test_pca/
-
+!/Mood_Detection/eigendata/*
