@@ -10,6 +10,8 @@ test.py
 eye.py
 average.py
 mouth.py
+test0.py
+test1.py
 
 #Training set
 *.png
