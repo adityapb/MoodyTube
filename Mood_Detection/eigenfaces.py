@@ -8,6 +8,7 @@ from numpy import asfarray
 from numpy import sort
 from numpy import trace
 from numpy import argmin
+from numpy import mean
 from numpy.linalg import *
 import imageops
 from os.path import isdir,join,normpath
@@ -140,15 +141,21 @@ class PCA():
 		usub=self.bundle.eigenfaces[:selectedfacesnum,:]
 		return dot(usub,inputface.transpose()).transpose()
 		
-	def findmatchingimage(self,imagename,selectedfacesnum,thresholdvalue):
+	def findmatchingimage(self,imagename,selectedfacesnum):
 		input_wk=self.inputWeight(imagename,selectedfacesnum)
-		dist = ((self.weights-input_wk)**2).sum(axis=1)
-		idx = argmin(dist)
-		mindist=sqrt(dist[idx])
+		dist_sad, dist_happy, c_sad, c_happy = 0,0,0.,0.
+		weights = self.createWeightHash()
+		for filename in weights:
+			if "sad" in filename:
+				dist_sad += sqrt(((weights[filename]-input_wk)**2).sum())
+				c_sad += 1
+			if "happy" in filename:
+				dist_happy += sqrt(((weights[filename]-input_wk)**2).sum())
+				c_happy += 1
 		result=""
-		if mindist < thresholdvalue:
-			result=self.bundle.imglist[idx]
-		return mindist,result
+		if dist_sad/c_sad > dist_happy/c_happy: result = "happy"
+		else: result = "sad"
+		return result
 		
 	def validateselectedimage(self,imgname):                     
 		selectimg=imageops.XImage(imgname)
@@ -167,7 +174,7 @@ class PCA():
 		ax.scatter(res[0],res[1],res[2],c='#000000')
 		for key in w:
 			val = w[key]
-			print key
+			#print key
 			if "sad" in key:
 				ax.scatter(val[0], val[1], val[2])
 			if "happy" in key:
