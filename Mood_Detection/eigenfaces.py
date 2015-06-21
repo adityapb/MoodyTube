@@ -14,11 +14,12 @@ import imageops
 from os.path import isdir,join,normpath
 from os import listdir,mkdir,getcwd,remove
 from shutil import rmtree
-import pickle
+import cPickle as pickle
 from math import sqrt
 import cv2
 import sys
 import glob
+import os
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -77,8 +78,8 @@ class PCA():
 		avgvals=average(facemat,axis=0)        
         #make average faceimage in currentdir just for fun viewing..
 		#if isdir('/average.png'): remove('average.png')
-		imageops.make_image(avgvals,"average.png",(imgwdth,imght))               
-        #substract avg val from each orig val to get adjusted faces(phi of T&P)     
+		self.average_image = imageops.make_image(avgvals,"average.png",(imgwdth,imght))              
+        #substract avg val from each orig val to get adjusted faces(phi of T&P)
 		adjfaces=facemat-avgvals        
 		adjfaces_tr=adjfaces.transpose()
 		L=dot(adjfaces , adjfaces_tr)
@@ -131,20 +132,22 @@ class PCA():
 			weights[filename] = self.weights[i]
 		return weights
 		
-	def inputWeight(self,imagename,selectedfacesnum):
+	def inputWeight(self,imagename,selectedfacesnum,avgvals=None,eigenfaces=None):
+		if avgvals is None: avgvals = self.bundle.avgvals
+		if eigenfaces is None: eigenfaces = self.bundle.eigenfaces
 		selectimg=self.validateselectedimage(imagename)
 		inputfacepixels=selectimg._pixellist
 		inputface=asfarray(inputfacepixels)
 		pixlistmax=max(inputface)
 		inputfacen=inputface/pixlistmax        
-		inputface=inputfacen-self.bundle.avgvals
-		usub=self.bundle.eigenfaces[:selectedfacesnum,:]
+		inputface=inputfacen-avgvals
+		usub=eigenfaces[:selectedfacesnum,:]
 		return dot(usub,inputface.transpose()).transpose()
 		
-	def findmatchingimage(self,imagename,selectedfacesnum):
+	def findmatchingimage(self,imagename,selectedfacesnum,weights=None):
 		input_wk=self.inputWeight(imagename,selectedfacesnum)
 		dist_sad, dist_happy, c_sad, c_happy = 0,0,0.,0.
-		weights = self.createWeightHash()
+		if weights is None: weights = self.createWeightHash()
 		for filename in weights:
 			if "sad" in filename:
 				dist_sad += sqrt(((weights[filename]-input_wk)**2).sum())
@@ -181,6 +184,16 @@ class PCA():
 				ax.scatter(val[0], val[1], val[2], c='#FF0000')
 		fig.savefig('plot.png')
 		plt.show()
+		
+	def saveVals(self,selectedfacesnum):
+		'''save self.bundle.eigenfaces and self.bundle.avgvals and self.weights'''
+		BASE_PATH = os.path.dirname(os.path.realpath(sys.argv[0]))
+		for x in range(selectedfacesnum):
+			imgname = BASE_PATH + '/eigendata/eigenface' + str(x) + '.png'
+			imageops.make_image(self.bundle.eigenfaces[:selectedfacesnum,:][x],imgname,(self.bundle.wd,self.bundle.ht))
+		weights = self.createWeightHash()
+		pickle.dump(weights,open(BASE_PATH + '/eigendata/weights.db','w'))
+		return
         
 if __name__ == '__main__':
 	P = PCA()
