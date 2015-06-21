@@ -8,13 +8,16 @@ import math
 
 class Mood_Detect():
 	
-	def __init__(self, nose_cascade = None, face_cascade = None, eye_cascade = None):
+	def __init__(self, nose_cascade = None, face_cascade = None, eye_cascade = None, sample = None):
 		self.nose = Image(nose_cascade)
 		self.face = Image(face_cascade)
 		self.eye = Image(eye_cascade)
 		self.nose_casc = nose_cascade
 		self.face_casc = face_cascade
 		self.eye_casc = eye_cascade
+		val = self.GetDimensions(sample)
+		self.dimensions = val['dimensions']
+		self.dist = val['distance']
 		
 	def GetImage(self, port):
 		'''
@@ -30,6 +33,23 @@ class Mood_Detect():
 					if len(self.identify(self.eye_casc, image[x[1]:x[1]+x[3], x[0]:x[0]+x[2]])) is 2:
 						del(cam)
 						return self.AlignEyes(image)
+						
+	def GetDimensions(self, img):
+		val = self.GetCentre(img)
+		centre = val['centre']
+		#return (up, down, left, right)
+		try:
+			return {'dimensions' : (img.shape[1] - centre[1], centre[1], centre[0], img.shape[0] - centre[0]),
+					'distance' : val['dist']}
+		except:
+			return None
+
+	def GetCentre(self, img):
+		eye = self.GetEyes(img)
+		try:
+			return {'centre' : ((eye[0][0]+eye[1][0])/2., eye[0][1]), 'dist' : abs(eye[0][0]-eye[1][0])}
+		except:
+			return None
 		
 	def IdError(self, img):
 		face = self.identify(self.face, img)
@@ -58,7 +78,7 @@ class Mood_Detect():
 		angle = math.degrees(math.atan(tangent))
 		return angle
 		
-	def AlignEyes(self, img):
+	def GetEyes(self, img):
 		'''Use Shi-Tomasi corner detection'''
 		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 		result = []
@@ -71,41 +91,38 @@ class Mood_Detect():
 					for i in corners:
 						u,v = i.ravel()
 						result.append((u+x+p, v+y+q))
-		print result
-		angle = self.GetAngle(result)
-		return self.eye.rotateImage(img, angle)
+		return result
 		
-	def GetNose(self, img):
-		nose = self.identify(self.nose, img)
-		if len(nose) is not 1:
-			return None
-		for (x, y, w, h) in nose:
-			return (x + (w/2.) , y + (h/2.))
+	def AlignEyes(self, img):
+		return self.eye.rotateImage(img, self.GetAngle(self.GetEyes(img)))
 			
-	def GetFace(self, img):
-		face = self.identify(self.face, img)
-		if len(face) is not 1:
-			return None
-		for (x, y, w, h) in face:
-			return (w, h)
-			
-	def AlignImage(self, img):
-		center = self.GetNose(img)
-		dimensions = self.GetFace(img)
+	def alignFace(self, image):
+		'''
+		x -> left
+		y -> down
+		w -> right + left
+		h -> up + down
+		'''
 		try:
-			return (center[0] - (dimensions[0]/2.),
-					center[1] - (dimensions[1]/2.), 
-					dimensions[0], 
-					dimensions[1])
+			centre = self.GetCentre(image)['centre']
+			dim = self.dimensions
+		except:
+			self.IdError(image)
+		try:
+			return (centre[0] - dim[2],
+					centre[1] - dim[1],
+					dim[2] + dim[3],
+					dim[0] + dim[1])
 		except:
 			return None
-			
-	def crop(self, img):
-		x = self.AlignImage(img)
+
+	def crop(self, image):
+		x = self.alignFace(image)
 		try:
-			return img[x[1]:x[1]+x[3] , x[0]:x[0]+x[2]]
+			return image[x[1]:x[1]+x[3] , x[0]:x[0]+x[2]]
 		except:
-			return self.IdError(img)
+			self.IdError(image)
+			return None
 			
 if __name__ == '__main__':
 	p = Mood_Detect(sys.argv[1], sys.argv[2], sys.argv[3])
