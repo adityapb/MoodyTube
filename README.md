@@ -22,5 +22,8 @@ Example of eigenfaces used in this case:<br>
 ![eigenface2](/Screenshots/eigenface2.png)<br>
 Here is an example plot of weights for images reconstructed using 3 eigenfaces:<br>
 ![plot](/Screenshots/plot.png)<br>
-The blue points represent sad faces and red points represent happy faces.
+The blue points represent sad faces and red points represent happy faces.<br><br>
+**Example of reconstruction weights for a sad person:**<br>
+![plot_recog](/Screenshots/plot_recog.png)<br>
+The black point is the person outside the training class.
 
