@@ -130,7 +130,7 @@ class PCA():
 			weights[filename] = self.weights[i]
 		return weights
 		
-	def findmatchingimage(self,imagename,selectedfacesnum,thresholdvalue):        
+	def inputWeight(self,imagename,selectedfacesnum):
 		selectimg=self.validateselectedimage(imagename)
 		inputfacepixels=selectimg._pixellist
 		inputface=asfarray(inputfacepixels)
@@ -138,7 +138,10 @@ class PCA():
 		inputfacen=inputface/pixlistmax        
 		inputface=inputfacen-self.bundle.avgvals
 		usub=self.bundle.eigenfaces[:selectedfacesnum,:]
-		input_wk=dot(usub,inputface.transpose()).transpose()        
+		return dot(usub,inputface.transpose()).transpose()
+		
+	def findmatchingimage(self,imagename,selectedfacesnum,thresholdvalue):
+		input_wk=self.inputWeight(imagename,selectedfacesnum)
 		dist = ((self.weights-input_wk)**2).sum(axis=1)
 		idx = argmin(dist)
 		mindist=sqrt(dist[idx])
@@ -152,14 +155,16 @@ class PCA():
 		selectwdth=selectimg._width
 		selectht=selectimg._height
 		if((selectwdth!=self.bundle.wd) or (selectht!=self.bundle.ht)):
-			raise ImageError("select image of correct size !")
+			raise ImageError("select image of correct size!")
 		else:
 			return selectimg
 			
-	def plot(self):
+	def plot(self,imagename,selectedfacesnum):
 		fig = plt.figure()
 		ax = fig.add_subplot(111, projection='3d')
 		w = self.createWeightHash()
+		res = self.inputWeight(imagename,selectedfacesnum)
+		ax.scatter(res[0],res[1],res[2],c='#000000')
 		for key in w:
 			val = w[key]
 			print key
