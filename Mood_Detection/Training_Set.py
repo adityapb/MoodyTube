@@ -11,7 +11,7 @@ Consider image alignment by eye detection using Shi-Tomasi corner detection algo
 '''
 
 
-from Image import Image
+from Image import Image_X
 from PreProcessing import PreProcessing
 import cv2
 import glob
@@ -26,9 +26,9 @@ class Training:
 
 	def __init__(self, nose_cascade = None, face_cascade = None, eye_cascade = None, sample = None):
 		#if nose_cascade or face_cascade is None: warnings.warn('Some of the cascades are still None')
-		self.nose = Image(nose_cascade)
-		self.face = Image(face_cascade)
-		self.eye = Image(eye_cascade)
+		self.nose = Image_X(nose_cascade)
+		self.face = Image_X(face_cascade)
+		self.eye = Image_X(eye_cascade)
 		val = self.GetDimensions(sample)
 		self.dimensions = val['dimensions']
 		self.dist = val['distance']
@@ -130,19 +130,16 @@ if __name__ == '__main__':
 	BASE_PATH = os.path.dirname(os.path.realpath(sys.argv[0]))
 	t = Training(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
 	images = {}
-	for filename in glob.glob(BASE_PATH + '/angry/*.JPG'):
+	for filename in glob.glob(BASE_PATH + '/sad/*.JPG'):
 		t.alignImage(BASE_PATH, filename)
 	#t.save(BASE_PATH + '/cropped', *images)
 	print "Done aligning..."
-	for filename in glob.glob(BASE_PATH + '/angry/*.JPG'):
+	for filename in glob.glob(BASE_PATH + '/sad/*.JPG'):
 		image = t.Resize(filename)
 		t.save(BASE_PATH, **{filename : image})
-	for filename in glob.glob(BASE_PATH + '/angry/*.JPG'):
+	for filename in glob.glob(BASE_PATH + '/sad/*.JPG'):
 		image = t.crop(filename)
-		try:
-			images[filename] = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-		except:
-			t.IdError(filename)
+		images[filename] = image
 		'''p = PreProcessing()
 		image = p.gray(image)
 		image = p.histogram_equalize(image)

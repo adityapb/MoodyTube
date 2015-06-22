@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-from Image import Image
+from Image import Image_X
+from eigenfaces import PCA
 import cv2
 import sys
 import numpy as np
@@ -9,9 +10,9 @@ import math
 class Mood_Detect():
 	
 	def __init__(self, nose_cascade = None, face_cascade = None, eye_cascade = None, sample = None):
-		self.nose = Image(nose_cascade)
-		self.face = Image(face_cascade)
-		self.eye = Image(eye_cascade)
+		self.nose = Image_X(nose_cascade)
+		self.face = Image_X(face_cascade)
+		self.eye = Image_X(eye_cascade)
 		self.nose_casc = nose_cascade
 		self.face_casc = face_cascade
 		self.eye_casc = eye_cascade
@@ -82,7 +83,7 @@ class Mood_Detect():
 		try:
 			dist = self.GetCentre(img)['dist']
 		except:
-			return self.IdError(filename)
+			#find something
 		scaleFactor = self.dist/float(dist)
 		return cv2.resize(img, (0,0), fx = scaleFactor, fy = scaleFactor)
 		
@@ -116,7 +117,7 @@ class Mood_Detect():
 			centre = self.GetCentre(image)['centre']
 			dim = self.dimensions
 		except:
-			return self.IdError(img)
+			#find something
 		try:
 			return (centre[0] - dim[2],
 					centre[1] - dim[1],
@@ -130,11 +131,17 @@ class Mood_Detect():
 		try:
 			return image[x[1]:x[1]+x[3] , x[0]:x[0]+x[2]]
 		except:
-			return self.IdError(image)
+			#find something
+			
+	'''def detect(self,img,face_no):
+		p = PCA()
+		p.findmood(img,face_no,)'''
 			
 if __name__ == '__main__':
 	p = Mood_Detect(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
-	cv2.imshow('face', p.GetImage(0))
+	im = p.GetImage(0)
+	cv2.imwrite('me.bmp',im)
+	cv2.imshow('face', im)
 	cv2.waitKey(0)
 			
 			

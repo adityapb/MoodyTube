@@ -9,6 +9,7 @@ from numpy import sort
 from numpy import trace
 from numpy import argmin
 from numpy import mean
+from numpy import array
 from numpy.linalg import *
 import imageops
 from os.path import isdir,join,normpath
@@ -135,7 +136,8 @@ class PCA():
 	def inputWeight(self,imagename,selectedfacesnum,avgvals=None,eigenfaces=None):
 		if avgvals is None: avgvals = self.bundle.avgvals
 		if eigenfaces is None: eigenfaces = self.bundle.eigenfaces
-		selectimg=self.validateselectedimage(imagename)
+		if isinstance(imagename,str): selectimg=self.validateselectedimage(imagename)
+		else: selectimage = imagename
 		inputfacepixels=selectimg._pixellist
 		inputface=asfarray(inputfacepixels)
 		pixlistmax=max(inputface)
@@ -143,9 +145,9 @@ class PCA():
 		inputface=inputfacen-avgvals
 		usub=eigenfaces[:selectedfacesnum,:]
 		return dot(usub,inputface.transpose()).transpose()
-		
-	def findmatchingimage(self,imagename,selectedfacesnum,weights=None):
-		input_wk=self.inputWeight(imagename,selectedfacesnum)
+	
+	def findmood(self,imagename,selectedfacesnum,weights=None,avgvals=None,eigenfaces=None):
+		input_wk=self.inputWeight(imagename,selectedfacesnum,avgvals,eigenfaces)
 		dist_sad, dist_happy, c_sad, c_happy = 0,0,0.,0.
 		if weights is None: weights = self.createWeightHash()
 		for filename in weights:
@@ -156,9 +158,23 @@ class PCA():
 				dist_happy += sqrt(((weights[filename]-input_wk)**2).sum())
 				c_happy += 1
 		result=""
+		print dist_sad, dist_happy
 		if dist_sad/c_sad > dist_happy/c_happy: result = "happy"
 		else: result = "sad"
 		return result
+		
+	def data(self):
+		weights = self.createWeightHash()
+		X,Y = [],[]
+		for key in weights:
+			if "happy" in key: Y.append("happy")
+			else: Y.append("sad")
+			X.append(weights[key])
+		return X,Y
+		
+	def savedata(self):
+		X,Y = self.data()
+		pickle.dump([array(X), array(Y)], open("data_svm.db","w"))
 		
 	def validateselectedimage(self,imgname):                     
 		selectimg=imageops.XImage(imgname)

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-'''Image class has all methods used on training dataset'''
+'''Image_X class has all methods used on training dataset'''
 
 import cv2
 import glob
@@ -8,9 +8,10 @@ import os
 import sys
 import numpy as np
 import math
+from PIL import Image
 from matplotlib import pyplot as plt
 
-class Image:
+class Image_X:
 
 	def __init__(self, cascade = None):
 		self.CASCADE_PATH = cascade
@@ -92,12 +93,8 @@ class Image:
 
 
 	def rotateImage(self, image, angle):
-  		image_center = tuple(np.array(image.shape)/2)
-  		rot_mat = cv2.getRotationMatrix2D((image_center[0], image_center[1]),angle,1.0)
-  		result = cv2.warpAffine(image, rot_mat, (int(math.sqrt(pow(image.shape[0],2) + pow(image.shape[1],2))), int(math.sqrt(pow(image.shape[0],2) + pow(image.shape[1],2)))),flags=cv2.INTER_LINEAR)
-  		#result = cv2.resize(result, tuple(reversed(image.shape[:2])))
-  		return result
-
+  		image = Image.fromarray(cv2.cvtColor(image,cv2.COLOR_BGR2GRAY))
+		return np.array(image.rotate(angle))
 
 	def alignEyes(self, *args):
 		'''args has images'''
@@ -120,9 +117,9 @@ class Image:
 if __name__ == '__main__':
 
 	if 'test' in sys.argv:
-		eye = Image(str(os.getcwd()) + '/haarcascades/haarcascade_eye.xml')
+		eye = Image_X(str(os.getcwd()) + '/haarcascades/haarcascade_eye.xml')
 		eye.testCornerDetect(str(os.getcwd()) + '/1.jpg')
 
 	if 'testalign' in sys.argv:
-		eye = Image(str(os.getcwd()) + '/haarcascades/haarcascade_eye.xml')
+		eye = Image_X(str(os.getcwd()) + '/haarcascades/haarcascade_eye.xml')
 		eye.testAlignment(str(os.getcwd()) + '/1.jpg')
