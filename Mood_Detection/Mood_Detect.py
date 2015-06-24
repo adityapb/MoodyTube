@@ -6,6 +6,7 @@ import cv2
 import sys
 import numpy as np
 import math
+from matplotlib import pyplot as plt
 
 class Mood_Detect():
 	
@@ -46,11 +47,9 @@ class Mood_Detect():
 			return None
 
 	def GetCentre(self, img):
-		eye = self.GetEyes(img)
-		try:
-			return {'centre' : ((eye[0][0]+eye[1][0])/2., eye[0][1]), 'dist' : abs(eye[0][0]-eye[1][0])}
-		except:
-			return None
+		#print img
+		eye = self.GetEyes_haar(img)
+		return {'centre' : ((eye[0][0]+eye[1][0])/2., eye[0][1]), 'dist' : abs(eye[0][0]-eye[1][0])}
 		
 	def IdError(self, img):
 		face = self.identify(self.face_casc, img)
@@ -60,7 +59,10 @@ class Mood_Detect():
 		
 	def identify(self, cascade, image):
 		Cascade = cv2.CascadeClassifier(cascade)
-		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+		try:
+			gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+		except:
+			gray = image
 		result = []
 		objects = Cascade.detectMultiScale(
 		    gray,
@@ -80,30 +82,43 @@ class Mood_Detect():
 		return angle
 		
 	def Resize(self, img):
-		try:
-			dist = self.GetCentre(img)['dist']
-		except:
-			#find something
+		#print img
+		dist = self.GetCentre(img)['dist']
+		print dist
 		scaleFactor = self.dist/float(dist)
+		print scaleFactor
 		return cv2.resize(img, (0,0), fx = scaleFactor, fy = scaleFactor)
 		
 	def GetEyes(self, img):
 		'''Use Shi-Tomasi corner detection'''
-		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+		try:
+			gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+		except:
+			gray = img
 		result = []
-		for (p, q, r, s) in self.identify(self.face_casc, img):
-			eyes = self.identify(self.eye_casc, img[q:q+s , p:p+r])
-			if len(eyes) is 2:
-				for (x, y, w, h) in eyes:
-					corners = cv2.goodFeaturesToTrack(gray[y:y+h , x:x+w],1,0.01,10)
-					corners = np.int0(corners)
-					for i in corners:
-						u,v = i.ravel()
-						result.append((u+x+p, v+y+q))
+		eyes = self.identify(self.eye_casc, img)
+		if len(eyes) is 2:
+			for (x, y, w, h) in eyes:
+				corners = cv2.goodFeaturesToTrack(gray[y:y+h , x:x+w],1,0.01,10)
+				corners = np.int0(corners)
+				for i in corners:
+					u,v = i.ravel()
+					result.append((u+x, v+y))
+		return result
+		
+	def GetEyes_haar(self, img):
+		#print img
+		try:
+			gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+		except:
+			gray = img
+		result = []
+		for (x, y, w, h) in self.identify(self.eye_casc, img):
+			result.append((x+w/2.,y+h/2.))
 		return result
 		
 	def AlignEyes(self, img):
-		return self.eye.rotateImage(img, self.GetAngle(self.GetEyes(img)))
+		return self.eye.rotateImage(img, self.GetAngle(self.GetEyes_haar(img)))
 			
 	def alignFace(self, img):
 		'''
@@ -112,36 +127,28 @@ class Mood_Detect():
 		w -> right + left
 		h -> up + down
 		'''
+		image = self.Resize(self.AlignEyes(img))
+		#print image
+		centre = self.GetCentre(image)['centre']
+		dim = self.dimensions
 		try:
-			image = self.Resize(self.AlignEyes(img))
-			centre = self.GetCentre(image)['centre']
-			dim = self.dimensions
+			return image,  (centre[0] - dim[2],
+							centre[1] - dim[1],
+							dim[2] + dim[3],
+							dim[0] + dim[1])
 		except:
-			#find something
-		try:
-			return (centre[0] - dim[2],
-					centre[1] - dim[1],
-					dim[2] + dim[3],
-					dim[0] + dim[1])
-		except:
-			return None
+			return image, None
 
 	def crop(self, image):
-		x = self.alignFace(image)
-		try:
-			return image[x[1]:x[1]+x[3] , x[0]:x[0]+x[2]]
-		except:
-			#find something
+		image, x = self.alignFace(image)
+		return image[x[1]:x[1]+x[3] , x[0]:x[0]+x[2]]
 			
 	'''def detect(self,img,face_no):
 		p = PCA()
 		p.findmood(img,face_no,)'''
 			
 if __name__ == '__main__':
-	p = Mood_Detect(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
-	im = p.GetImage(0)
-	cv2.imwrite('me.bmp',im)
-	cv2.imshow('face', im)
+	m = Mood_Detect(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+	cv2.imshow('blah', m.GetImage(0))
 	cv2.waitKey(0)
-			
 			
