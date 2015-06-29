@@ -12,16 +12,14 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def PlayMusic(request):
-	#print mood
 	t = get_template('mood.html')
 	mood = request.GET.get('q', '')
 	with open(str(os.getcwd()) + '/Data/data.db', 'rb') as f:
 		data = pickle.load(f)
 	playlists = data[str(mood)]
 	c = {'playlist' : playlists,
-		 'query' : mood}
-	html = t.render(Context(c))
-	return HttpResponse(html)
+		 'query' : mood,}
+	return render_to_response('mood.html', c, context_instance = RequestContext(request))
 
 def logout_page(request):
 	logout(request)
