@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from MoodyTube.views import PlayMusic
+from MoodyTube.views import *
 
 urlpatterns = patterns('',
     # Examples:
@@ -8,5 +8,8 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
-    (r'^$', PlayMusic),
+    url(r'^$', PlayMusic),
+    url(r'^login/$', 'django.contrib.auth.views.login'),
+    url(r'^register/$', register_page),
+    url(r'^logout/$', logout_page),
 )
