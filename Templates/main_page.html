@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+	{% block title %}MoodyTube!!{% endblock %}
+	{% block head %}Welcome to MoodyTube!!{% endblock %}
+	{% block content %}
+		{% if user.username %}
+			<p>Welcome <b>{{ user.username }}</b><br>
+			Here is your <a href = '/mood'>Moody Tube</a>
+			</p>
+			<p><a href = '/logout'>LOGOUT</a></p>
+		{% else %}
+			<p>Welcome
+			You need to <a href = '/login'>login</a> before you can use Moody Tube!!<br>
+			If you are new than <a href = '/register'>Register</a> here. 
+			</p>
+		{% endif %}
+	{% endblock %}

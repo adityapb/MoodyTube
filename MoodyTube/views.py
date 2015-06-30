@@ -10,6 +10,9 @@ from MoodyTube.forms import *
 from django.shortcuts import render, render_to_response
 from django.contrib.auth.decorators import login_required
 
+def main_page(request):
+	return render_to_response('main_page.html', RequestContext(request))
+
 @login_required
 def PlayMusic(request):
 	t = get_template('mood.html')
