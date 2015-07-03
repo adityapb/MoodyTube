@@ -9,6 +9,16 @@
 	</head>
 	<body>
 		<h1>MoodyTube</h1>
+		<div id = 'nav'>
+			<a href = '/'>HOME</a> | 
+			{% if user.is_authenticated %}
+				<a href = '/user/{{ user.username }}/'>{{ user.username }}</a> |
+				<a href = '/logout'>Logout</a>
+			{% else %}
+				<a href = '/login/'>Login</a> | 
+				<a href = '/register/'>Registration</a>
+			{% endif %}
+		</div>
 		<form action = "." method = "get">
 			<label for="q">Enter your mood:</label>
 			<input type="text" name="q" value="{{ query|escape }}" >
