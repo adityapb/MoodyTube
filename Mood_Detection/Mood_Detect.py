@@ -2,15 +2,19 @@
 
 from Image import Image_X
 from eigenfaces import PCA
+from classifier import Predictor
+import glob
 import cv2
 import sys
 import numpy as np
 import math
+import cPickle as pickle
+import PreProcessing as pr
 from matplotlib import pyplot as plt
 
 class Mood_Detect():
 	
-	def __init__(self, nose_cascade = None, face_cascade = None, eye_cascade = None, sample = None):
+	def __init__(self, nose_cascade = None, face_cascade = None, eye_cascade = None, sample = None, data_dir = None):
 		self.nose = Image_X(nose_cascade)
 		self.face = Image_X(face_cascade)
 		self.eye = Image_X(eye_cascade)
@@ -20,12 +24,27 @@ class Mood_Detect():
 		val = self.GetDimensions(cv2.imread(sample))
 		self.dimensions = val['dimensions']
 		self.dist = val['distance']
+		self.dir = data_dir
 		
-	def GetImage(self, port):
+	def GetImages(self, port):
 		'''
 		When two eyes and face are detected, capture the image
 		'''
 		cam_port = port
+		cam = cv2.VideoCapture(port)
+		images = []
+		while True:
+			if len(images) is 20:
+				del(cam)
+				return images
+			ret, image = cam.read()
+			face = self.identify(self.face_casc, image)
+			if len(face) is 1:
+				for x in face:
+					if len(self.identify(self.eye_casc, image[x[1]:x[1]+x[3], x[0]:x[0]+x[2]])) is 2:
+						images.append(self.process(self.crop(image)))
+						
+	def GetRealtimeInput(self,port):
 		cam = cv2.VideoCapture(port)
 		while True:
 			ret, image = cam.read()
@@ -33,8 +52,13 @@ class Mood_Detect():
 			if len(face) is 1:
 				for x in face:
 					if len(self.identify(self.eye_casc, image[x[1]:x[1]+x[3], x[0]:x[0]+x[2]])) is 2:
-						del(cam)
-						return self.crop(image)
+						return self.process(self.crop(image))
+						
+	def process(self, image):
+		image = pr.gamma_correction(0.2,image)
+		image = pr.dog_filter(image)
+		image = pr.histogram_equalize(image)
+		return image
 						
 	def GetDimensions(self, img):
 		val = self.GetCentre(img)
@@ -146,9 +170,21 @@ class Mood_Detect():
 	'''def detect(self,img,face_no):
 		p = PCA()
 		p.findmood(img,face_no,)'''
+		
+	def detect(self,num,classifier):
+		p = PCA()
+		imagename = self.GetRealtimeInput(0)
+		cv2.imshow('you', imagename)
+		cv2.waitKey(0)
+		cv2.imwrite('test.bmp',imagename)
+		facenum = num
+		avgvals = pickle.load(open(self.dir+'/average.db','r'))
+		eigenfaces = pickle.load(open(self.dir+'/eigenfaces.db','r'))
+		weights = p.inputWeight(imagename,facenum,avgvals,eigenfaces)
+		s = Predictor(classifier)
+		return s.predict(weights)
 			
 if __name__ == '__main__':
-	m = Mood_Detect(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
-	cv2.imshow('blah', m.GetImage(0))
-	cv2.waitKey(0)
-			
+	m = Mood_Detect(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
+	print m.detect(14,'classifier.db')
+		
