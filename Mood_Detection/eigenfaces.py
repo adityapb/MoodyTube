@@ -99,6 +99,7 @@ class PCA():
 			u[i]=u[i]/norm        
         
 		self.bundle=FaceVal(imglist,imgwdth,imght,adjfaces,u,avgvals,evals)
+		#self.save(u,avgvals)
 		self.createEigenimages(u)# eigenface images
 		
 	def createEigenimages(self,eigenspace):                
@@ -136,8 +137,7 @@ class PCA():
 	def inputWeight(self,imagename,selectedfacesnum,avgvals=None,eigenfaces=None):
 		if avgvals is None: avgvals = self.bundle.avgvals
 		if eigenfaces is None: eigenfaces = self.bundle.eigenfaces
-		if isinstance(imagename,str): selectimg=self.validateselectedimage(imagename)
-		else: selectimage = imagename
+		selectimg=self.validateselectedimage(imagename)
 		inputfacepixels=selectimg._pixellist
 		inputface=asfarray(inputfacepixels)
 		pixlistmax=max(inputface)
@@ -178,25 +178,23 @@ class PCA():
 		
 	def validateselectedimage(self,imgname):                     
 		selectimg=imageops.XImage(imgname)
-		selectwdth=selectimg._width
-		selectht=selectimg._height
-		if((selectwdth!=self.bundle.wd) or (selectht!=self.bundle.ht)):
-			raise ImageError("select image of correct size!")
-		else:
-			return selectimg
+		return selectimg
 			
-	def plot(self,imagename,selectedfacesnum):
+	def plot(self,selectedfacesnum,imagename=None):
 		fig = plt.figure()
 		ax = fig.add_subplot(111, projection='3d')
 		w = self.createWeightHash()
-		res = self.inputWeight(imagename,selectedfacesnum)
-		ax.scatter(res[0],res[1],res[2],c='#000000')
+		if imagename is not None:
+			res = self.inputWeight(imagename,selectedfacesnum)
+			ax.scatter(res[0],res[1],res[2],c='#00FF00')
 		for key in w:
 			val = w[key]
 			#print key
 			if "sad" in key:
-				ax.scatter(val[0], val[1], val[2])
+				ax.scatter(val[0], val[1], val[2], c = '#000000')
 			if "happy" in key:
+				ax.scatter(val[0], val[1], val[2])
+			if "angry" in key:
 				ax.scatter(val[0], val[1], val[2], c='#FF0000')
 		fig.savefig('plot.png')
 		plt.show()
@@ -204,11 +202,9 @@ class PCA():
 	def saveVals(self,selectedfacesnum):
 		'''save self.bundle.eigenfaces and self.bundle.avgvals and self.weights'''
 		BASE_PATH = os.path.dirname(os.path.realpath(sys.argv[0]))
-		for x in range(selectedfacesnum):
-			imgname = BASE_PATH + '/eigendata/eigenface' + str(x) + '.png'
-			imageops.make_image(self.bundle.eigenfaces[:selectedfacesnum,:][x],imgname,(self.bundle.wd,self.bundle.ht))
-		weights = self.createWeightHash()
-		pickle.dump(weights,open(BASE_PATH + '/eigendata/weights.db','w'))
+		pickle.dump(self.bundle.eigenfaces[:selectedfacesnum,:], open(BASE_PATH+'/eigendata/eigenfaces.db','w'))
+		pickle.dump(self.bundle.avgvals, open(BASE_PATH+'/eigendata/average.db','w'))
+		pickle.dump(self.weights, open(BASE_PATH+'/eigendata/weights.db','w'))
 		return
         
 if __name__ == '__main__':
@@ -217,5 +213,8 @@ if __name__ == '__main__':
 	for filename in glob.glob(sys.argv[1] + '/*.bmp'):
 		files.append(filename)
 	P.createFaceVal(files)
-	print P.calculateWeights(5)
+	P.calculateWeights(3)
+	#P.savedata()
+	#P.saveVals(14)
+	P.plot(3,'test.bmp')
 		

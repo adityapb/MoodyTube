@@ -15,5 +15,5 @@ def gray(image):
 	return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 	
 def dog_filter(img):
-	return cv2.GaussianBlur(img,img.shape,0)
-		
+	return cv2.GaussianBlur(img,(5,5),0)
+

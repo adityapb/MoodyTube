@@ -9,7 +9,7 @@ class SVM():
 		self.Y = data[1]
 		
 	def train(self):
-		clf = svm.SVC()
+		clf = svm.SVC(kernel='linear', C=2)
 		clf.fit(self.X,self.Y)
 		return clf
 		
@@ -27,7 +27,7 @@ class Predictor():
 if __name__ == "__main__":
 	s = SVM("data_svm.db")
 	s.saveClassifier()
-	inpt = pickle.load(open("testval.db","r"))
-	P = Predictor("classifier.db")
-	print P.predict(inpt)
+	#p = Predictor('classifier.db')
+	#inpt = pickle.load(open('testval.db','r'))
+	#print p.predict(inpt)
 	
